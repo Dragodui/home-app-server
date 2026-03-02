@@ -17,10 +17,10 @@ import {
   BarChart2,
   User,
 } from "lucide-react-native";
-import { useAuth } from "@/contexts/AuthContext";
-import { useHome } from "@/contexts/HomeContext";
-import { useTheme } from "@/contexts/ThemeContext";
-import { useI18n, interpolate } from "@/contexts/I18nContext";
+import { useAuth } from "@/stores/authStore";
+import { useHome } from "@/stores/homeStore";
+import { useTheme } from "@/stores/themeStore";
+import { useI18n, interpolate } from "@/stores/i18nStore";
 import { taskApi, pollApi, billApi } from "@/lib/api";
 import { TaskAssignment, Poll } from "@/lib/types";
 import { useRealtimeRefresh } from "@/lib/useRealtimeRefresh";

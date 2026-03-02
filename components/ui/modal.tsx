@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { X } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTheme } from "@/contexts/ThemeContext";
+import { useTheme } from "@/stores/themeStore";
 
 interface ModalProps {
   visible: boolean;

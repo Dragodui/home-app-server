@@ -50,6 +50,7 @@ export default {
     googleSignInNotReady: "Вхід через Google ще не готовий",
     googleSignInCancelled: "Вхід через Google було скасовано або він не вдався",
     failedToGetUserInfo: "Не вдалося отримати інформацію про користувача з Google",
+    leaveHome: "Покинути дім",
   },
 
   // Verification
@@ -196,6 +197,16 @@ export default {
     scanFailed: "Не вдалося сканувати чек",
     noTotalDetected: "Не вдалося визначити суму",
     manualEntry: "Ручне введення",
+    splitBetween: "Розділити між",
+    equalSplit: "Порівну",
+    manualSplit: "Вручну",
+    yourShare: "Ваша частка",
+    uploadedBy: "Завантажив",
+    editSplits: "Редагувати поділ",
+    splitUpdated: "Поділ оновлено",
+    markAsPaid: "Позначити як сплачено",
+    paid: "Сплачено",
+    unpaid: "Несплачено",
   },
 
   // Polls

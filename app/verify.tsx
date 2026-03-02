@@ -9,8 +9,8 @@ import { useRouter, useLocalSearchParams, Stack } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Button from "@/components/ui/button";
 import Colors from "@/constants/colors";
-import { useAuth } from "@/contexts/AuthContext";
-import { useI18n, interpolate } from "@/contexts/I18nContext";
+import { useAuth } from "@/stores/authStore";
+import { useI18n, interpolate } from "@/stores/i18nStore";
 import { Mail, CheckCircle, XCircle, ArrowLeft } from "lucide-react-native";
 
 export default function VerifyEmailScreen() {

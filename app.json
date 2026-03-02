@@ -33,7 +33,8 @@
         {
           "origin": "https://rork.com/"
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true

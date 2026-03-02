@@ -50,6 +50,7 @@ export default {
     googleSignInNotReady: "Google-Anmeldung ist noch nicht bereit",
     googleSignInCancelled: "Google-Anmeldung wurde abgebrochen oder ist fehlgeschlagen",
     failedToGetUserInfo: "Benutzerinformationen von Google konnten nicht abgerufen werden",
+    leaveHome: "Heim verlassen",
   },
 
   // Verification
@@ -196,6 +197,16 @@ export default {
     scanFailed: "Beleg konnte nicht gescannt werden",
     noTotalDetected: "Betrag konnte nicht erkannt werden",
     manualEntry: "Manuelle Eingabe",
+    splitBetween: "Aufteilen zwischen",
+    equalSplit: "Gleichmäßig",
+    manualSplit: "Manuell",
+    yourShare: "Dein Anteil",
+    uploadedBy: "Hochgeladen von",
+    editSplits: "Aufteilung bearbeiten",
+    splitUpdated: "Aufteilung aktualisiert",
+    markAsPaid: "Als bezahlt markieren",
+    paid: "Bezahlt",
+    unpaid: "Unbezahlt",
   },
 
   // Polls

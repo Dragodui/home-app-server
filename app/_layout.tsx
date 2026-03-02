@@ -3,8 +3,7 @@ import "../global.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
-import { useColorScheme } from "react-native";
+import { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
   useFonts,
@@ -18,15 +17,38 @@ import {
 } from "@expo-google-fonts/manrope";
 import { StatusBar } from "expo-status-bar";
 
-import { AuthProvider } from "@/contexts/AuthContext";
-import { HomeProvider } from "@/contexts/HomeContext";
-import { WebSocketProvider } from "@/contexts/WebSocketContext";
-import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
-import { I18nProvider } from "@/contexts/I18nContext";
+import { useI18nStore } from "@/stores/i18nStore";
+import { useThemeStore, useTheme } from "@/stores/themeStore";
+import { useAuthStore } from "@/stores/authStore";
+import { useHomeStore } from "@/stores/homeStore";
+import { wsManager } from "@/lib/websocket";
 
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
+
+function StoreInitializer({ children }: { children: React.ReactNode }) {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    async function init() {
+      // Init independent stores in parallel
+      await Promise.all([
+        useI18nStore.getState().init(),
+        useThemeStore.getState().init(),
+        useAuthStore.getState().init(),
+      ]);
+      // These depend on auth being loaded
+      wsManager.init();
+      useHomeStore.getState().init();
+      setReady(true);
+    }
+    init();
+  }, []);
+
+  if (!ready) return null;
+  return <>{children}</>;
+}
 
 function RootLayoutNav() {
   const { theme } = useTheme();
@@ -46,6 +68,7 @@ function RootLayoutNav() {
         <Stack.Screen name="settings" options={{ headerShown: false }} />
         <Stack.Screen name="notifications" options={{ headerShown: false }} />
         <Stack.Screen name="security" options={{ headerShown: false }} />
+        <Stack.Screen name="members" options={{ headerShown: false }} />
         <Stack.Screen name="smarthome/index" options={{ headerShown: false }} />
       </Stack>
     </>
@@ -59,13 +82,7 @@ function AppContent() {
     <GestureHandlerRootView
       className={`flex-1 ${theme.isDark ? "bg-background-dark" : "bg-background"}`}
     >
-      <AuthProvider>
-        <WebSocketProvider>
-          <HomeProvider>
-            <RootLayoutNav />
-          </HomeProvider>
-        </WebSocketProvider>
-      </AuthProvider>
+      <RootLayoutNav />
     </GestureHandlerRootView>
   );
 }
@@ -93,11 +110,9 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <I18nProvider>
-        <ThemeProvider>
-          <AppContent />
-        </ThemeProvider>
-      </I18nProvider>
+      <StoreInitializer>
+        <AppContent />
+      </StoreInitializer>
     </QueryClientProvider>
   );
 }

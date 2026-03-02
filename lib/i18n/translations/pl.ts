@@ -50,6 +50,7 @@ export default {
     googleSignInNotReady: "Logowanie przez Google nie jest jeszcze gotowe",
     googleSignInCancelled: "Logowanie przez Google zostało anulowane lub nie powiodło się",
     failedToGetUserInfo: "Nie udało się pobrać informacji o użytkowniku z Google",
+    leaveHome: "Opuść dom",
   },
 
   // Verification
@@ -196,6 +197,16 @@ export default {
     scanFailed: "Nie udało się zeskanować paragonu",
     noTotalDetected: "Nie wykryto kwoty",
     manualEntry: "Wpis ręczny",
+    splitBetween: "Podziel między",
+    equalSplit: "Równo",
+    manualSplit: "Ręcznie",
+    yourShare: "Twój udział",
+    uploadedBy: "Dodane przez",
+    editSplits: "Edytuj podział",
+    splitUpdated: "Podział zaktualizowany",
+    markAsPaid: "Oznacz jako opłacone",
+    paid: "Opłacone",
+    unpaid: "Nieopłacone",
   },
 
   // Polls

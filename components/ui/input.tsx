@@ -1,7 +1,7 @@
 import { FC, useState } from "react";
 import { View, Text, TextInput, TextInputProps, TouchableOpacity } from "react-native";
 import { Eye, EyeOff } from "lucide-react-native";
-import { useTheme } from "@/contexts/ThemeContext";
+import { useTheme } from "@/stores/themeStore";
 
 interface InputProps extends TextInputProps {
   label?: string;

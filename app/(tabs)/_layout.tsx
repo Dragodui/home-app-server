@@ -8,8 +8,8 @@ import {
   ChartColumn,
   DollarSign,
 } from "lucide-react-native";
-import { useTheme } from "@/contexts/ThemeContext";
-import { useI18n } from "@/contexts/I18nContext";
+import { useTheme } from "@/stores/themeStore";
+import { useI18n } from "@/stores/i18nStore";
 import fonts from "@/constants/fonts";
 
 export default function TabLayout() {

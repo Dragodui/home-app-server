@@ -197,6 +197,16 @@ export default {
     scanFailed: "Failed to scan receipt",
     noTotalDetected: "Could not detect total amount",
     manualEntry: "Manual Entry",
+    splitBetween: "Split Between",
+    equalSplit: "Equal",
+    manualSplit: "Manual",
+    yourShare: "Your share",
+    uploadedBy: "Uploaded by",
+    editSplits: "Edit Splits",
+    splitUpdated: "Splits updated",
+    markAsPaid: "Mark as paid",
+    paid: "Paid",
+    unpaid: "Unpaid",
   },
 
   // Polls

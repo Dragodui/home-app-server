@@ -1,7 +1,7 @@
 import { FC, ReactNode } from "react";
 import { View, Text, ViewStyle, Image, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTheme } from "@/contexts/ThemeContext";
+import { useTheme } from "@/stores/themeStore";
 
 interface PageHeaderProps {
   title: string;

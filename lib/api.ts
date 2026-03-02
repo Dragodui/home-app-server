@@ -1,5 +1,5 @@
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { secureStorage } from "./secureStorage";
 import {
   User,
   Home,
@@ -42,7 +42,7 @@ export const api = axios.create({
 // Request interceptor - add auth token
 api.interceptors.request.use(
   async (config) => {
-    const token = await AsyncStorage.getItem("auth_token");
+    const token = await secureStorage.getItem("auth_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -60,8 +60,8 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       const message = error.response?.data?.error ?? "";
       if (message === "token revoked" || message === "invalid token") {
-        await AsyncStorage.removeItem("auth_token");
-        await AsyncStorage.removeItem("user");
+        await secureStorage.removeItem("auth_token");
+        await secureStorage.removeItem("user");
       }
     }
     return Promise.reject(error);
@@ -78,8 +78,8 @@ export const authApi = {
   login: async (email: string, password: string): Promise<AuthResponse> => {
     const response = await api.post<AuthResponse>("/auth/login", { email, password });
     if (response.data.token) {
-      await AsyncStorage.setItem("auth_token", response.data.token);
-      await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
+      await secureStorage.setItem("auth_token", response.data.token);
+      await secureStorage.setItem("user", JSON.stringify(response.data.user));
     }
     return response.data;
   },
@@ -127,15 +127,15 @@ export const authApi = {
     } catch {
       // Proceed with local cleanup even if server call fails
     }
-    await AsyncStorage.removeItem("auth_token");
-    await AsyncStorage.removeItem("user");
+    await secureStorage.removeItem("auth_token");
+    await secureStorage.removeItem("user");
   },
 
   googleSignIn: async (accessToken: string): Promise<AuthResponse> => {
     const response = await api.post<AuthResponse>("/auth/google/mobile", { access_token: accessToken });
     if (response.data.token) {
-      await AsyncStorage.setItem("auth_token", response.data.token);
-      await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
+      await secureStorage.setItem("auth_token", response.data.token);
+      await secureStorage.setItem("user", JSON.stringify(response.data.user));
     }
     return response.data;
   },
@@ -340,6 +340,16 @@ export const billApi = {
 
   markPayed: async (homeId: number, billId: number): Promise<{ message: string }> => {
     const response = await api.patch<{ status: boolean; message: string }>(`/homes/${homeId}/bills/${billId}`);
+    return { message: response.data.message };
+  },
+
+  updateSplits: async (homeId: number, billId: number, splits: { user_id: number; amount: number }[]): Promise<{ message: string }> => {
+    const response = await api.put<{ status: boolean; message: string }>(`/homes/${homeId}/bills/${billId}/splits`, { splits });
+    return { message: response.data.message };
+  },
+
+  markSplitPaid: async (homeId: number, billId: number, splitId: number): Promise<{ message: string }> => {
+    const response = await api.patch<{ status: boolean; message: string }>(`/homes/${homeId}/bills/${billId}/splits/${splitId}/paid`);
     return { message: response.data.message };
   },
 };
@@ -590,6 +600,7 @@ export type {
   Task,
   TaskAssignment,
   Bill,
+  BillSplit,
   ShoppingCategory,
   ShoppingItem,
   Poll,

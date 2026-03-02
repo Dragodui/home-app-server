@@ -10,7 +10,7 @@ import {
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ArrowLeft, Mail, CheckCircle } from "lucide-react-native";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/stores/authStore";
 import Colors from "@/constants/colors";
 import Input from "@/components/ui/input";
 import Button from "@/components/ui/button";

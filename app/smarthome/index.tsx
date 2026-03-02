@@ -26,9 +26,9 @@ import {
   Wifi,
   WifiOff,
 } from "lucide-react-native";
-import { useHome } from "@/contexts/HomeContext";
-import { useTheme } from "@/contexts/ThemeContext";
-import { useI18n } from "@/contexts/I18nContext";
+import { useHome } from "@/stores/homeStore";
+import { useTheme } from "@/stores/themeStore";
+import { useI18n } from "@/stores/i18nStore";
 import Modal from "@/components/ui/modal";
 import Input from "@/components/ui/input";
 import Button from "@/components/ui/button";

@@ -6,7 +6,7 @@ import {
   ViewStyle,
   TextStyle,
 } from "react-native";
-import { useTheme } from "@/contexts/ThemeContext";
+import { useTheme } from "@/stores/themeStore";
 
 type ButtonVariant =
   | "primary"

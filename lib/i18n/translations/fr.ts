@@ -50,6 +50,7 @@ export default {
     googleSignInNotReady: "La connexion Google n'est pas encore prête",
     googleSignInCancelled: "La connexion Google a été annulée ou a échoué",
     failedToGetUserInfo: "Impossible de récupérer les informations utilisateur de Google",
+    leaveHome: "Quitter le foyer",
   },
 
   // Verification
@@ -196,6 +197,16 @@ export default {
     scanFailed: "Échec du scan du reçu",
     noTotalDetected: "Montant non détecté",
     manualEntry: "Saisie manuelle",
+    splitBetween: "Partager entre",
+    equalSplit: "Égal",
+    manualSplit: "Manuel",
+    yourShare: "Votre part",
+    uploadedBy: "Ajouté par",
+    editSplits: "Modifier le partage",
+    splitUpdated: "Partage mis à jour",
+    markAsPaid: "Marquer comme payé",
+    paid: "Payé",
+    unpaid: "Impayé",
   },
 
   // Polls

@@ -18,14 +18,14 @@ import {
   Trash2,
   Users,
 } from "lucide-react-native";
-import { useTheme } from "@/contexts/ThemeContext";
-import { useI18n } from "@/contexts/I18nContext";
-import { useHome } from "@/contexts/HomeContext";
-import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/stores/themeStore";
+import { useI18n } from "@/stores/i18nStore";
+import { useHome } from "@/stores/homeStore";
+import { useAuth } from "@/stores/authStore";
 import { homeApi } from "@/lib/api";
 import { HomeMembership } from "@/lib/types";
 import { useRealtimeRefresh } from "@/lib/useRealtimeRefresh";
-import { interpolate } from "@/contexts/I18nContext";
+import { interpolate } from "@/stores/i18nStore";
 
 export default function MembersScreen() {
   const insets = useSafeAreaInsets();

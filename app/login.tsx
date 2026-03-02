@@ -9,9 +9,9 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAuth } from "@/contexts/AuthContext";
-import { useTheme } from "@/contexts/ThemeContext";
-import { useI18n } from "@/contexts/I18nContext";
+import { useAuth } from "@/stores/authStore";
+import { useTheme } from "@/stores/themeStore";
+import { useI18n } from "@/stores/i18nStore";
 import Input from "@/components/ui/input";
 import Button from "@/components/ui/button";
 import { useGoogleAuth } from "@/lib/useGoogleAuth";

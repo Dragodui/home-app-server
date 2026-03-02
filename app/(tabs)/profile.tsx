@@ -28,16 +28,16 @@ import {
 import * as Clipboard from "expo-clipboard";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { useAuth } from "@/contexts/AuthContext";
-import { useHome } from "@/contexts/HomeContext";
-import { useTheme } from "@/contexts/ThemeContext";
+import { useAuth } from "@/stores/authStore";
+import { useHome } from "@/stores/homeStore";
+import { useTheme } from "@/stores/themeStore";
 import Modal from "@/components/ui/modal";
 import Input from "@/components/ui/input";
 import Button from "@/components/ui/button";
 
 import * as ImagePicker from "expo-image-picker";
 import { imageApi } from "@/lib/api";
-import { useI18n } from "@/contexts/I18nContext";
+import { useI18n } from "@/stores/i18nStore";
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();

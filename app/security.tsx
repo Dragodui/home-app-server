@@ -16,9 +16,9 @@ import {
   CheckCircle,
   AlertCircle,
 } from "lucide-react-native";
-import { useTheme } from "@/contexts/ThemeContext";
-import { useI18n } from "@/contexts/I18nContext";
-import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/stores/themeStore";
+import { useI18n } from "@/stores/i18nStore";
+import { useAuth } from "@/stores/authStore";
 import { authApi } from "@/lib/api";
 import Modal from "@/components/ui/modal";
 import Input from "@/components/ui/input";

@@ -287,14 +287,14 @@ export interface ControlDeviceRequest {
 }
 
 export interface OCRResult {
-  total: number;
-  date?: string;
-  invoice_number?: string;
   vendor?: string;
+  date?: string;
+  total: number;
   items?: {
     name: string;
     quantity: number;
     price: number;
-    total: number;
   }[];
+  raw_text?: string;
+  confidence?: number;
 }

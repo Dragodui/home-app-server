@@ -7,9 +7,10 @@ import {
   ActivityIndicator,
   RefreshControl,
   Alert,
+  Image,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { DollarSign, Plus, Trash, ScanLine } from "lucide-react-native";
+import { DollarSign, Plus, Trash, ScanLine, Camera, ChevronDown, ChevronUp, Receipt } from "lucide-react-native";
 import Svg, { Circle } from "react-native-svg";
 import * as ImagePicker from "expo-image-picker";
 import { useHome } from "@/contexts/HomeContext";
@@ -17,9 +18,8 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useI18n } from "@/contexts/I18nContext";
 import { billApi, billCategoryApi, imageApi, ocrApi } from "@/lib/api";
-import { Bill, BillCategory } from "@/lib/types";
+import { Bill, BillCategory, OCRResult } from "@/lib/types";
 import { useRealtimeRefresh } from "@/lib/useRealtimeRefresh";
-import fonts from "@/constants/fonts";
 import Modal from "@/components/ui/modal";
 import Input from "@/components/ui/input";
 import Button from "@/components/ui/button";
@@ -61,7 +61,7 @@ const DonutChart = ({ data, size = 180, strokeWidth = 20, total, theme }: { data
         })}
       </Svg>
       <View className="absolute justify-center items-center">
-        <Text className="text-2xl font-manrope-bold" style={{ color: theme.text }}>${total.toFixed(0)}</Text>
+        <Text className="text-2xl font-manrope-bold" style={{ color: theme.text }}>{total.toFixed(0)}</Text>
         <Text className="text-xs font-manrope" style={{ color: theme.textSecondary }}>Total</Text>
       </View>
     </View>
@@ -90,8 +90,14 @@ export default function BudgetScreen() {
   const [selectedColor, setSelectedColor] = useState(theme.accent.yellow);
   const [creatingCategory, setCreatingCategory] = useState(false);
 
-  const [scanning, setScanning] = useState(false);
+  // Scan flow state
+  const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
   const [selectedLanguage, setSelectedLanguage] = useState("eng");
+  const [scanning, setScanning] = useState(false);
+  const [ocrResult, setOcrResult] = useState<OCRResult | null>(null);
+
+  // Receipt history state
+  const [expandedReceiptId, setExpandedReceiptId] = useState<number | null>(null);
 
   const COLOR_OPTIONS = [
     "#FF7476", "#FF9F7A", "#FBEB9E", "#A8E6CF", "#7DD3E8", "#D8D4FC", "#F5A3D3",
@@ -135,6 +141,24 @@ export default function BudgetScreen() {
     setRefreshing(true);
     await loadData();
     setRefreshing(false);
+  };
+
+  const resetScanState = () => {
+    setSelectedImageUri(null);
+    setOcrResult(null);
+    setScanning(false);
+  };
+
+  const handleOpenCreateModal = () => {
+    resetScanState();
+    setNewBillAmount("");
+    setSelectedCategoryId(null);
+    setShowCreateModal(true);
+  };
+
+  const handleCloseCreateModal = () => {
+    resetScanState();
+    setShowCreateModal(false);
   };
 
   const handleCreateCategory = async () => {
@@ -198,11 +222,12 @@ export default function BudgetScreen() {
         total_amount: parseFloat(newBillAmount),
         period_start: now.toISOString(),
         period_end: endDate.toISOString(),
-        ocr_data: {},
+        ocr_data: ocrResult || {},
       });
 
       setNewBillAmount("");
       setSelectedCategoryId(null);
+      resetScanState();
       setShowCreateModal(false);
       await loadData();
     } catch (error) {
@@ -233,40 +258,53 @@ export default function BudgetScreen() {
     ]);
   };
 
-  const handleScan = async () => {
+  // Step 1: Pick image from gallery
+  const handlePickImage = async () => {
     try {
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            quality: 0.8,
-        });
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 0.8,
+      });
 
-        if (!result.canceled && result.assets[0].uri) {
-            setScanning(true);
-            
-            const formData = new FormData();
-            // @ts-ignore
-            formData.append("image", {
-                uri: result.assets[0].uri,
-                name: "receipt.jpg",
-                type: "image/jpeg",
-            });
-
-            const uploadRes = await imageApi.upload(formData);
-            const ocrRes = await ocrApi.process(uploadRes.url, selectedLanguage);
-            console.log(ocrRes)
-            if (ocrRes.total) {
-                setNewBillAmount(ocrRes.total.toString());
-                Alert.alert(t.common.success || "Success", `Scanned amount: ${ocrRes.total}`);
-            } else {
-                Alert.alert("OCR", "Could not detect total amount");
-            }
-        }
+      if (!result.canceled && result.assets[0].uri) {
+        setSelectedImageUri(result.assets[0].uri);
+        setOcrResult(null);
+      }
     } catch (error) {
-        console.error("Scan error:", error);
-        Alert.alert(t.common.error, "Failed to scan receipt");
+      console.error("Image picker error:", error);
+    }
+  };
+
+  // Step 2: Upload + process with OCR
+  const handleProcessReceipt = async () => {
+    if (!selectedImageUri) return;
+
+    setScanning(true);
+    try {
+      const formData = new FormData();
+      // @ts-ignore
+      formData.append("image", {
+        uri: selectedImageUri,
+        name: "receipt.jpg",
+        type: "image/jpeg",
+      });
+
+      const uploadRes = await imageApi.upload(formData);
+      const result = await ocrApi.process(uploadRes.url, selectedLanguage);
+
+      setOcrResult(result);
+
+      if (result.total) {
+        setNewBillAmount(result.total.toString());
+      } else {
+        Alert.alert("OCR", t.budget.noTotalDetected);
+      }
+    } catch (error) {
+      console.error("Scan error:", error);
+      Alert.alert(t.common.error, t.budget.scanFailed);
     } finally {
-        setScanning(false);
+      setScanning(false);
     }
   };
 
@@ -303,6 +341,13 @@ export default function BudgetScreen() {
 
   const totalSpend = bills.reduce((sum, b) => sum + b.total_amount, 0);
 
+  // Bills that have OCR data with actual content
+  const receiptBills = bills.filter(b => {
+    if (!b.ocr_data) return false;
+    const data = b.ocr_data as Record<string, any>;
+    return data.vendor || data.total || (data.items && data.items.length > 0);
+  });
+
   if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center" style={{ backgroundColor: theme.background }}>
@@ -330,7 +375,7 @@ export default function BudgetScreen() {
             <TouchableOpacity
               className="px-4 py-2 rounded-xl justify-center items-center"
               style={{ backgroundColor: theme.accent.pink }}
-              onPress={() => setShowCreateModal(true)}
+              onPress={handleOpenCreateModal}
             >
               <Plus size={24} color="#FFFFFF" />
             </TouchableOpacity>
@@ -363,6 +408,7 @@ export default function BudgetScreen() {
           </ScrollView>
         </View>
 
+        {/* Bills list */}
         <View className="gap-3">
           {bills.map((bill) => (
             <View key={bill.id} className="p-4 rounded-2xl" style={{ backgroundColor: theme.surface }}>
@@ -377,7 +423,7 @@ export default function BudgetScreen() {
                   </Text>
                 </View>
                 <Text className="text-lg font-manrope-bold" style={{ color: theme.text }}>
-                  ${bill.total_amount.toFixed(2)}
+                  {bill.total_amount.toFixed(2)}
                 </Text>
                 <TouchableOpacity
                   onPress={() => handleDeleteBill(bill.id)}
@@ -394,56 +440,212 @@ export default function BudgetScreen() {
             </Text>
           )}
         </View>
+
+        {/* Receipt History Section */}
+        {receiptBills.length > 0 && (
+          <View className="mt-8">
+            <Text className="text-sm font-manrope-bold uppercase mb-3" style={{ color: theme.textSecondary }}>
+              {t.budget.receiptHistory}
+            </Text>
+            <View className="gap-3">
+              {receiptBills.map((bill) => {
+                const data = bill.ocr_data as Record<string, any>;
+                const isExpanded = expandedReceiptId === bill.id;
+                const items = data.items || [];
+
+                return (
+                  <TouchableOpacity
+                    key={bill.id}
+                    className="p-4 rounded-2xl"
+                    style={{ backgroundColor: theme.surface }}
+                    onPress={() => setExpandedReceiptId(isExpanded ? null : bill.id)}
+                    activeOpacity={0.7}
+                  >
+                    <View className="flex-row items-center gap-3">
+                      <View className="w-10 h-10 rounded-full justify-center items-center" style={{ backgroundColor: theme.accent.yellow }}>
+                        <Receipt size={20} color="#1C1C1E" />
+                      </View>
+                      <View className="flex-1">
+                        <Text className="text-base font-manrope-semibold mb-0.5" style={{ color: theme.text }}>
+                          {data.vendor || getCategoryName(bill)}
+                        </Text>
+                        <Text className="text-xs" style={{ color: theme.textSecondary }}>
+                          {data.date || new Date(bill.created_at).toLocaleDateString("pl-PL")}
+                          {items.length > 0 && ` \u2022 ${items.length} ${t.budget.items.toLowerCase()}`}
+                        </Text>
+                      </View>
+                      <Text className="text-lg font-manrope-bold mr-2" style={{ color: theme.text }}>
+                        {bill.total_amount.toFixed(2)}
+                      </Text>
+                      {isExpanded ? (
+                        <ChevronUp size={18} color={theme.textSecondary} />
+                      ) : (
+                        <ChevronDown size={18} color={theme.textSecondary} />
+                      )}
+                    </View>
+
+                    {isExpanded && items.length > 0 && (
+                      <View className="mt-3 pt-3" style={{ borderTopWidth: 1, borderTopColor: theme.border }}>
+                        {items.map((item: any, idx: number) => (
+                          <View key={idx} className="flex-row justify-between py-1.5">
+                            <Text className="text-sm flex-1" style={{ color: theme.text }}>
+                              {item.name}
+                              {item.quantity > 1 && (
+                                <Text style={{ color: theme.textSecondary }}> x{item.quantity}</Text>
+                              )}
+                            </Text>
+                            <Text className="text-sm font-manrope-semibold" style={{ color: theme.text }}>
+                              {item.price?.toFixed(2)}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+        )}
       </ScrollView>
 
+      {/* Create Expense Modal */}
       <Modal
         visible={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
+        onClose={handleCloseCreateModal}
         title={t.budget.addExpense}
         height="full"
       >
         <View className="pt-2.5">
+          {/* Scan Receipt Section */}
           <View className="mb-6">
-            <Text className="text-xs font-manrope-bold uppercase mb-2" style={{ color: theme.textSecondary }}>Scan Receipt</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-3" contentContainerStyle={{ gap: 8 }}>
-                {LANGUAGES.map((lang) => (
-                    <TouchableOpacity
-                        key={lang.code}
-                        onPress={() => setSelectedLanguage(lang.code)}
-                        className="px-3 py-1.5 rounded-full border"
-                        style={{ 
+            <Text className="text-xs font-manrope-bold uppercase mb-2" style={{ color: theme.textSecondary }}>
+              {t.budget.scanReceipt}
+            </Text>
+
+            {/* Step 1: Pick image */}
+            {!selectedImageUri ? (
+              <TouchableOpacity
+                className="w-full py-6 rounded-xl justify-center items-center gap-2"
+                style={{ backgroundColor: theme.surface, borderStyle: 'dashed', borderWidth: 1, borderColor: theme.border }}
+                onPress={handlePickImage}
+              >
+                <Camera size={28} color={theme.textSecondary} />
+                <Text className="font-manrope-semibold" style={{ color: theme.textSecondary }}>
+                  {t.budget.uploadReceipt}
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              <View>
+                {/* Image preview */}
+                <View className="rounded-xl overflow-hidden mb-3" style={{ borderWidth: 1, borderColor: theme.border }}>
+                  <Image
+                    source={{ uri: selectedImageUri }}
+                    style={{ width: '100%', height: 160 }}
+                    resizeMode="cover"
+                  />
+                </View>
+
+                <TouchableOpacity
+                  className="mb-3"
+                  onPress={handlePickImage}
+                >
+                  <Text className="text-sm font-manrope-semibold text-center" style={{ color: theme.accent.pink }}>
+                    {t.budget.changePhoto}
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Step 2: Language selector + Process button (only if no result yet) */}
+                {!ocrResult && (
+                  <View>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-3" contentContainerStyle={{ gap: 8 }}>
+                      {LANGUAGES.map((lang) => (
+                        <TouchableOpacity
+                          key={lang.code}
+                          onPress={() => setSelectedLanguage(lang.code)}
+                          className="px-3 py-1.5 rounded-full border"
+                          style={{
                             backgroundColor: selectedLanguage === lang.code ? theme.text : 'transparent',
-                            borderColor: selectedLanguage === lang.code ? theme.text : theme.border 
-                        }}
-                    >
-                        <Text style={{ 
+                            borderColor: selectedLanguage === lang.code ? theme.text : theme.border
+                          }}
+                        >
+                          <Text style={{
                             color: selectedLanguage === lang.code ? theme.background : theme.textSecondary,
                             fontSize: 12,
                             fontWeight: '600'
-                        }}>
+                          }}>
                             {lang.label}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+
+                    <Button
+                      title={scanning ? t.budget.processing : t.budget.processReceipt}
+                      onPress={handleProcessReceipt}
+                      loading={scanning}
+                      disabled={scanning}
+                      variant="primary"
+                      icon={!scanning ? <ScanLine size={18} color={theme.isDark ? "#1C1C1E" : "#FFFFFF"} /> : undefined}
+                    />
+                  </View>
+                )}
+
+                {/* Step 3: OCR Results preview */}
+                {ocrResult && (
+                  <View className="p-4 rounded-xl mb-2" style={{ backgroundColor: theme.background }}>
+                    <Text className="text-xs font-manrope-bold uppercase mb-3" style={{ color: theme.textSecondary }}>
+                      {t.budget.scanResults}
+                    </Text>
+
+                    {ocrResult.vendor && (
+                      <View className="flex-row justify-between mb-2">
+                        <Text className="text-sm" style={{ color: theme.textSecondary }}>{t.budget.vendor}</Text>
+                        <Text className="text-sm font-manrope-semibold" style={{ color: theme.text }}>{ocrResult.vendor}</Text>
+                      </View>
+                    )}
+
+                    {ocrResult.date && (
+                      <View className="flex-row justify-between mb-2">
+                        <Text className="text-sm" style={{ color: theme.textSecondary }}>{t.budget.date}</Text>
+                        <Text className="text-sm font-manrope-semibold" style={{ color: theme.text }}>{ocrResult.date}</Text>
+                      </View>
+                    )}
+
+                    {ocrResult.items && ocrResult.items.length > 0 && (
+                      <View className="mt-1 pt-2" style={{ borderTopWidth: 1, borderTopColor: theme.border }}>
+                        <Text className="text-xs font-manrope-bold uppercase mb-2" style={{ color: theme.textSecondary }}>
+                          {t.budget.items} ({ocrResult.items.length})
                         </Text>
-                    </TouchableOpacity>
-                ))}
-            </ScrollView>
-            
-            <TouchableOpacity
-              className="w-full py-3 rounded-xl flex-row justify-center items-center gap-2 mb-2"
-              style={{ backgroundColor: theme.surface, borderStyle: 'dashed', borderWidth: 1, borderColor: theme.border }}
-              onPress={handleScan}
-              disabled={scanning}
-            >
-              {scanning ? (
-                  <ActivityIndicator size="small" color={theme.text} />
-              ) : (
-                  <ScanLine size={20} color={theme.text} />
-              )}
-              <Text className="font-manrope-semibold" style={{ color: theme.text }}>
-                  {scanning ? "Scanning..." : "Scan from Gallery"}
-              </Text>
-            </TouchableOpacity>
+                        {ocrResult.items.map((item, idx) => (
+                          <View key={idx} className="flex-row justify-between py-1">
+                            <Text className="text-sm flex-1" style={{ color: theme.text }}>
+                              {item.name}
+                              {item.quantity > 1 && (
+                                <Text style={{ color: theme.textSecondary }}> x{item.quantity}</Text>
+                              )}
+                            </Text>
+                            <Text className="text-sm font-manrope-semibold" style={{ color: theme.text }}>
+                              {item.price.toFixed(2)}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    )}
+
+                    {ocrResult.total > 0 && (
+                      <View className="flex-row justify-between mt-2 pt-2" style={{ borderTopWidth: 1, borderTopColor: theme.border }}>
+                        <Text className="text-sm font-manrope-bold" style={{ color: theme.text }}>{t.common.total}</Text>
+                        <Text className="text-sm font-manrope-bold" style={{ color: theme.text }}>{ocrResult.total.toFixed(2)}</Text>
+                      </View>
+                    )}
+                  </View>
+                )}
+              </View>
+            )}
           </View>
 
+          {/* Manual entry / Category & Amount */}
           <Text className="text-xs font-manrope-bold uppercase mb-2" style={{ color: theme.textSecondary }}>{t.budget.category}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
             <View className="flex-row gap-2.5">
@@ -482,6 +684,7 @@ export default function BudgetScreen() {
         </View>
       </Modal>
 
+      {/* Create Category Modal */}
       <Modal
         visible={showCategoryModal}
         onClose={() => setShowCategoryModal(false)}

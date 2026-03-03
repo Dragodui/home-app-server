@@ -4,7 +4,6 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  ActivityIndicator,
   RefreshControl,
   Image,
 } from "react-native";
@@ -50,9 +49,17 @@ export default function HomeScreen() {
     return t.home.goodEvening;
   };
 
-  const loadDashboardData = useCallback(async () => {
+
+  const loadDashboardData = useCallback(async (isRefresh = false) => {
     if (!home || !user) {
+      if (!homeLoading) {
+        setIsLoading(false);
+      }
       return;
+    }
+
+    if (!isRefresh) {
+      setIsLoading(true);
     }
 
     try {
@@ -85,7 +92,26 @@ export default function HomeScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [home, user]);
+  }, [home, user, homeLoading]);
+
+  useEffect(() => {
+    if (authLoading) return;
+
+    if (!isAuthenticated) {
+      router.replace("/login");
+      return;
+    }
+
+    loadDashboardData(false);
+  }, [authLoading, isAuthenticated, home, user, loadDashboardData, router]);
+
+  useRealtimeRefresh(["TASK", "POLL", "BILL", "BILL_CATEGORY"], () => loadDashboardData(true));
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadDashboardData(true);
+    setRefreshing(false);
+  };
 
   useEffect(() => {
     if (authLoading) return;
@@ -99,12 +125,6 @@ export default function HomeScreen() {
   }, [authLoading, isAuthenticated, home, user, loadDashboardData, router]);
 
   useRealtimeRefresh(["TASK", "POLL", "BILL", "BILL_CATEGORY"], loadDashboardData);
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await loadDashboardData();
-    setRefreshing(false);
-  };
 
   if (authLoading || homeLoading || isLoading) {
     return <HomeSkeleton />;

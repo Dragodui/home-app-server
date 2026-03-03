@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   Switch,
+  Image
 } from "react-native";
 import DatePicker from "@/components/ui/date-picker";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -255,13 +256,10 @@ export default function PollsScreen() {
                     </Text>
                   </View>
                   <View className="flex-row items-center gap-2">
-                    {poll.allow_revote && (
-                      <View className="bg-white/60 p-1.5 rounded-lg">
-                        <RotateCcw size={12} color="#1C1C1E" />
-                      </View>
-                    )}
-                    <View className="flex-row items-center">
-                      <Users size={16} color="#1C1C1E" />
+                    <View className="bg-white/60 px-3 py-1.5 rounded-xl">
+                      <Text className="text-xs font-manrope-semibold text-[#1C1C1E]">
+                        {poll.type}
+                      </Text>
                     </View>
                   </View>
                 </View>
@@ -280,27 +278,24 @@ export default function PollsScreen() {
                     return (
                       <TouchableOpacity
                         key={option.id}
-                        className={`rounded-xl p-4 flex-row justify-between items-center ${
-                          isSelected ? "bg-[#1C1C1E]" : "bg-white/60"
-                        }`}
+                        className={`rounded-xl p-4 flex-row justify-between items-center ${isSelected ? "bg-[#1C1C1E]" : "bg-white/60"
+                          }`}
                         onPress={() => !voted && handleVote(poll.id, option.id)}
                         onLongPress={() => poll.type === "public" && (option.votes?.length ?? 0) > 0 && setVotersOption(option)}
                         disabled={voted && poll.type !== "public"}
                         activeOpacity={voted ? 1 : 0.8}
                       >
                         <Text
-                          className={`text-[15px] font-manrope-semibold ${
-                            isSelected ? "text-white" : "text-[#1C1C1E]"
-                          }`}
+                          className={`text-[15px] font-manrope-semibold ${isSelected ? "text-white" : "text-[#1C1C1E]"
+                            }`}
                         >
                           {option.title}
                         </Text>
                         <View className="flex-row items-center gap-2">
                           {isSelected && <Check size={16} color="#FFFFFF" />}
                           <Text
-                            className={`text-[13px] font-manrope-medium ${
-                              isSelected ? "text-white/70" : "text-black/50"
-                            }`}
+                            className={`text-[13px] font-manrope-medium ${isSelected ? "text-white/70" : "text-black/50"
+                              }`}
                           >
                             {voteCount} {voteCount !== 1 ? t.polls.votes : t.polls.vote}
                           </Text>
@@ -540,20 +535,24 @@ export default function PollsScreen() {
       <Modal
         visible={votersOption !== null}
         onClose={() => setVotersOption(null)}
-        title={votersOption?.title}
-        height="auto"
+        title={`${votersOption?.title} voters`}
       >
         <View className="gap-3">
           {votersOption?.votes?.map((vote) => (
             <View key={vote.id} className="flex-row items-center gap-3 py-2">
-              <View
-                className="w-9 h-9 rounded-full justify-center items-center"
-                style={{ backgroundColor: theme.accent.purple }}
-              >
-                <Text className="text-sm font-manrope-bold text-[#1C1C1E]">
-                  {(vote.user?.name ?? "?").charAt(0).toUpperCase()}
-                </Text>
-              </View>
+              {
+                vote.user?.avatar ? <Image source={{ uri: vote.user.avatar }}
+                  className="w-9 h-9 rounded-full justify-center items-center"
+                /> : <View
+                  className="w-9 h-9 rounded-full justify-center items-center"
+                  style={{ backgroundColor: theme.accent.purple }}
+                >
+
+                  <Text className="text-sm font-manrope-bold text-[#1C1C1E]">
+                    {(vote.user?.name ?? "?").charAt(0).toUpperCase()}
+                  </Text></View>
+              }
+
               <Text className="text-base font-manrope-semibold" style={{ color: theme.text }}>
                 {vote.user?.name ?? `User #${vote.user_id}`}
               </Text>

@@ -1,10 +1,11 @@
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeft, CheckCircle, Mail, XCircle } from "lucide-react-native";
-import { useEffect, useState } from "react";
-import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, AppState, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Button from "@/components/ui/button";
 import Colors from "@/constants/colors";
+import { userApi } from "@/lib/api";
 import { useAuth } from "@/stores/authStore";
 import { interpolate, useI18n } from "@/stores/i18nStore";
 
@@ -20,6 +21,28 @@ export default function VerifyEmailScreen() {
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
   const email = paramEmail || "";
+  const appState = useRef(AppState.currentState);
+
+  // When app comes to foreground, check if email was verified in browser
+  useEffect(() => {
+    if (token) return; // Skip if we're doing token-based verification
+
+    const subscription = AppState.addEventListener("change", async (nextAppState) => {
+      if (appState.current.match(/inactive|background/) && nextAppState === "active") {
+        try {
+          const user = await userApi.getMe();
+          if (user.emailVerified) {
+            setVerified(true);
+          }
+        } catch {
+          // Not logged in or network error — ignore
+        }
+      }
+      appState.current = nextAppState;
+    });
+
+    return () => subscription.remove();
+  }, [token]);
 
   useEffect(() => {
     if (!token) return;
@@ -92,6 +115,35 @@ export default function VerifyEmailScreen() {
               title={verified ? t.verify.continueToLogin : t.verify.tryAgain}
               onPress={() => router.replace("/login")}
               variant={verified ? "purple" : "primary"}
+              className="w-full mt-3"
+            />
+          </View>
+        </View>
+      </>
+    );
+  }
+
+  // Email verified after returning from browser
+  if (verified) {
+    return (
+      <>
+        <Stack.Screen options={{ headerShown: false }} />
+        <View className="flex-1 bg-white px-8" style={{ paddingTop: insets.top + 40 }}>
+          <View className="flex-1 justify-center items-center pb-20">
+            <View
+              className="w-24 h-24 rounded-full justify-center items-center mb-6"
+              style={{ backgroundColor: Colors.green500 }}
+            >
+              <CheckCircle size={48} color={Colors.white} />
+            </View>
+            <Text className="text-[28px] font-manrope-bold text-black mb-3 text-center">{t.verify.emailVerified}</Text>
+            <Text className="text-base font-manrope text-gray-500 text-center leading-6 mb-8 px-4">
+              {t.verify.verifiedMessage}
+            </Text>
+            <Button
+              title={t.verify.continueToLogin}
+              onPress={() => router.replace("/login")}
+              variant="purple"
               className="w-full mt-3"
             />
           </View>

@@ -106,6 +106,7 @@ export interface Bill {
   period_end: string;
   uploaded_by: number;
   description?: string;
+  receipt_image?: string;
   ocr_data?: Record<string, any>;
   created_at: string;
   user?: User;
@@ -239,6 +240,7 @@ export interface CreateTaskForm {
 export interface CreateBillForm {
   type: string;
   description?: string;
+  receipt_image?: string;
   total_amount: number;
   period_start: string;
   period_end: string;

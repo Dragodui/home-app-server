@@ -230,6 +230,9 @@ export default {
     unpaid: "Unpaid",
     description: "Description (Optional)",
     descriptionPlaceholder: "Add details...",
+    monthlyTrend: "Monthly Trend",
+    last6Months: "Last 6 months",
+    viewReceipt: "View Receipt",
   },
 
   // Polls

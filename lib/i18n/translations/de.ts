@@ -230,6 +230,9 @@ export default {
     unpaid: "Unbezahlt",
     description: "Beschreibung (Optional)",
     descriptionPlaceholder: "Details hinzufügen...",
+    monthlyTrend: "Monatlicher Trend",
+    last6Months: "Letzte 6 Monate",
+    viewReceipt: "Beleg anzeigen",
   },
 
   // Polls

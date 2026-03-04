@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,15 +9,15 @@ import {
   Image,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { DollarSign, Plus, Trash, ScanLine, Camera, ChevronDown, ChevronUp, Receipt, Check, Pencil, Users, FileText, File } from "lucide-react-native";
-import Svg, { Circle } from "react-native-svg";
+import { DollarSign, Plus, Trash, ScanLine, Camera, ChevronDown, ChevronUp, Receipt, Check, Pencil, Users, FileText, File, TrendingUp, Eye } from "lucide-react-native";
+import Svg, { Circle, Rect, Text as SvgText, Line } from "react-native-svg";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import { useHome } from "@/stores/homeStore";
 import { useTheme } from "@/stores/themeStore";
 import { useAuth } from "@/stores/authStore";
 import { useI18n } from "@/stores/i18nStore";
-import { billApi, billCategoryApi, ocrApi } from "@/lib/api";
+import { billApi, billCategoryApi, ocrApi, imageApi } from "@/lib/api";
 import { Bill, BillCategory, BillSplit, OCRResult, HomeMembership } from "@/lib/types";
 import { useRealtimeRefresh } from "@/lib/useRealtimeRefresh";
 import Modal from "@/components/ui/modal";
@@ -67,6 +67,61 @@ const DonutChart = ({ data, size = 180, strokeWidth = 20, total, theme }: { data
         <Text className="text-xs font-manrope" style={{ color: theme.textSecondary }}>Total</Text>
       </View>
     </View>
+  );
+};
+
+const BarChart = ({ data, width = 300, height = 200, theme }: { data: { month: string; total: number }[]; width?: number; height?: number; theme: any }) => {
+  const maxVal = Math.max(...data.map(d => d.total), 1);
+  const barWidth = Math.min(32, (width - 40) / data.length - 8);
+  const chartHeight = height - 40;
+  const barSpacing = (width - 20) / data.length;
+
+  return (
+    <Svg width={width} height={height}>
+      <Line x1={10} y1={chartHeight} x2={width - 10} y2={chartHeight} stroke={theme.border} strokeWidth={1} />
+      {data.map((item, i) => {
+        const barH = (item.total / maxVal) * (chartHeight - 10);
+        const x = 10 + i * barSpacing + (barSpacing - barWidth) / 2;
+        const y = chartHeight - barH;
+        const isLast = i === data.length - 1;
+
+        return (
+          <React.Fragment key={i}>
+            <Rect
+              x={x}
+              y={y}
+              width={barWidth}
+              height={Math.max(barH, 2)}
+              rx={barWidth / 2}
+              fill={isLast ? theme.accent.pink : theme.accent.purple}
+              opacity={isLast ? 1 : 0.5}
+            />
+            <SvgText
+              x={x + barWidth / 2}
+              y={chartHeight + 16}
+              fontSize={11}
+              fill={theme.textSecondary}
+              textAnchor="middle"
+              fontWeight="600"
+            >
+              {item.month}
+            </SvgText>
+            {item.total > 0 && (
+              <SvgText
+                x={x + barWidth / 2}
+                y={y - 6}
+                fontSize={10}
+                fill={theme.text}
+                textAnchor="middle"
+                fontWeight="700"
+              >
+                {item.total >= 1000 ? `${(item.total / 1000).toFixed(1)}k` : item.total.toFixed(0)}
+              </SvgText>
+            )}
+          </React.Fragment>
+        );
+      })}
+    </Svg>
   );
 };
 
@@ -123,6 +178,14 @@ export default function BudgetScreen() {
   // Expanded bill card
   const [expandedBillId, setExpandedBillId] = useState<number | null>(null);
 
+  // Trend modal
+  const [showTrendModal, setShowTrendModal] = useState(false);
+  const [monthlyTrends, setMonthlyTrends] = useState<{ month: string; total: number }[]>([]);
+
+  // Receipt image viewer
+  const [showReceiptImageModal, setShowReceiptImageModal] = useState(false);
+  const [receiptImageUrl, setReceiptImageUrl] = useState<string | null>(null);
+
   const members: HomeMembership[] = home?.memberships ?? [];
 
   const COLOR_OPTIONS = [
@@ -144,12 +207,30 @@ export default function BudgetScreen() {
     }
 
     try {
-      const [billsData, categoriesData] = await Promise.all([
+      const [billsData, categoriesData, allBillsData] = await Promise.all([
         billApi.getByHomeId(home.id, filterCategoryId ?? undefined).catch(() => []),
         billCategoryApi.getAll(home.id).catch(() => []),
+        billApi.getByHomeId(home.id).catch(() => []),
       ]);
       setBills(billsData || []);
       setCategories(categoriesData || []);
+
+      // Compute monthly trends (last 6 months)
+      const now = new Date();
+      const months: { month: string; total: number }[] = [];
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const monthBills = (allBillsData || []).filter((b) => {
+          const bd = new Date(b.created_at);
+          return bd.getMonth() === d.getMonth() && bd.getFullYear() === d.getFullYear();
+        });
+        months.push({
+          month: monthNames[d.getMonth()],
+          total: monthBills.reduce((sum, b) => sum + b.total_amount, 0),
+        });
+      }
+      setMonthlyTrends(months);
     } catch (error) {
       console.error("Error loading budget data:", error);
     } finally {
@@ -259,10 +340,28 @@ export default function BudgetScreen() {
       const totalAmount = parseFloat(newBillAmount);
       const splits = buildSplits(splitUserIds, splitMode, manualAmounts, totalAmount);
 
+      // Upload receipt image if available
+      let receiptImageUrl: string | undefined;
+      if (selectedImageUri && selectedFileType === "image") {
+        try {
+          const formData = new FormData();
+          formData.append("image", {
+            uri: selectedImageUri,
+            type: "image/jpeg",
+            name: "receipt.jpg",
+          } as any);
+          const { url } = await imageApi.upload(formData);
+          receiptImageUrl = url;
+        } catch (e) {
+          console.error("Failed to upload receipt image:", e);
+        }
+      }
+
       await billApi.create(home.id, {
         type: category?.name || "Expense",
         bill_category_id: selectedCategoryId,
         description: newBillDescription || undefined,
+        receipt_image: receiptImageUrl,
         total_amount: totalAmount,
         period_start: now.toISOString(),
         period_end: endDate.toISOString(),
@@ -621,9 +720,23 @@ export default function BudgetScreen() {
         </View>
 
         {totalSpend > 0 && (
-          <View className="items-center mb-8">
+          <View className="items-center mb-4">
             <DonutChart data={chartData} total={totalSpend} theme={theme} />
           </View>
+        )}
+
+        {monthlyTrends.length > 0 && (
+          <TouchableOpacity
+            className="flex-row items-center justify-center gap-2 py-3 mb-6 rounded-2xl"
+            style={{ backgroundColor: theme.surface }}
+            onPress={() => setShowTrendModal(true)}
+            activeOpacity={0.7}
+          >
+            <TrendingUp size={18} color={theme.accent.purple} />
+            <Text className="text-sm font-manrope-bold" style={{ color: theme.text }}>
+              {t.budget.monthlyTrend}
+            </Text>
+          </TouchableOpacity>
         )}
 
         <View className="mb-6">
@@ -842,6 +955,22 @@ export default function BudgetScreen() {
                           </View>
                         ))}
                       </View>
+                    )}
+                    {isExpanded && bill.receipt_image && (
+                      <TouchableOpacity
+                        className="flex-row items-center justify-center gap-2 mt-3 py-2.5 rounded-xl"
+                        style={{ backgroundColor: theme.background }}
+                        onPress={() => {
+                          setReceiptImageUrl(bill.receipt_image!);
+                          setShowReceiptImageModal(true);
+                        }}
+                        activeOpacity={0.7}
+                      >
+                        <Eye size={16} color={theme.accent.purple} />
+                        <Text className="text-sm font-manrope-semibold" style={{ color: theme.accent.purple }}>
+                          {t.budget.viewReceipt}
+                        </Text>
+                      </TouchableOpacity>
                     )}
                   </TouchableOpacity>
                 );
@@ -1146,6 +1275,51 @@ export default function BudgetScreen() {
             style={{ marginTop: 20 }}
           />
         </View>
+      </Modal>
+
+      {/* Monthly Trend Modal */}
+      <Modal
+        visible={showTrendModal}
+        onClose={() => setShowTrendModal(false)}
+        title={t.budget.monthlyTrend}
+        height="auto"
+      >
+        <View className="pt-2.5">
+          <Text className="text-sm font-manrope mb-4" style={{ color: theme.textSecondary }}>
+            {t.budget.last6Months}
+          </Text>
+          <View className="items-center mb-6">
+            <BarChart data={monthlyTrends} width={320} height={220} theme={theme} />
+          </View>
+          <View className="gap-2">
+            {monthlyTrends.map((item, idx) => (
+              <View key={idx} className="flex-row justify-between py-2 px-3 rounded-xl" style={{ backgroundColor: theme.background }}>
+                <Text className="text-sm font-manrope-semibold" style={{ color: theme.text }}>{item.month}</Text>
+                <Text className="text-sm font-manrope-bold" style={{ color: idx === monthlyTrends.length - 1 ? theme.accent.pink : theme.text }}>
+                  ${item.total.toFixed(2)}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Receipt Image Viewer Modal */}
+      <Modal
+        visible={showReceiptImageModal}
+        onClose={() => { setShowReceiptImageModal(false); setReceiptImageUrl(null); }}
+        title={t.budget.viewReceipt}
+        height="full"
+      >
+        {receiptImageUrl && (
+          <View className="flex-1 items-center justify-center pt-4">
+            <Image
+              source={{ uri: receiptImageUrl }}
+              style={{ width: "100%", height: 500 }}
+              resizeMode="contain"
+            />
+          </View>
+        )}
       </Modal>
     </View>
   );

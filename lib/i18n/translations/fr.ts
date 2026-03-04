@@ -230,6 +230,9 @@ export default {
     unpaid: "Impayé",
     description: "Description (Facultatif)",
     descriptionPlaceholder: "Ajouter des détails...",
+    monthlyTrend: "Tendance mensuelle",
+    last6Months: "6 derniers mois",
+    viewReceipt: "Voir le reçu",
   },
 
   // Polls

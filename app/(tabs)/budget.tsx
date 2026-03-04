@@ -70,7 +70,7 @@ const DonutChart = ({ data, size = 180, strokeWidth = 20, total, theme }: { data
   );
 };
 
-const BarChart = ({ data, width = 300, height = 200, theme }: { data: { month: string; total: number }[]; width?: number; height?: number; theme: any }) => {
+const BarChart = ({ data, width = 300, height = 240, theme }: { data: { month: string; total: number }[]; width?: number; height?: number; theme: any }) => {
   const maxVal = Math.max(...data.map(d => d.total), 1);
   const barWidth = Math.min(32, (width - 40) / data.length - 8);
   const chartHeight = height - 40;
@@ -80,7 +80,7 @@ const BarChart = ({ data, width = 300, height = 200, theme }: { data: { month: s
     <Svg width={width} height={height}>
       <Line x1={10} y1={chartHeight} x2={width - 10} y2={chartHeight} stroke={theme.border} strokeWidth={1} />
       {data.map((item, i) => {
-        const barH = (item.total / maxVal) * (chartHeight - 10);
+        const barH = (item.total / maxVal) * (chartHeight - 20);
         const x = 10 + i * barSpacing + (barSpacing - barWidth) / 2;
         const y = chartHeight - barH;
         const isLast = i === data.length - 1;
@@ -1282,7 +1282,7 @@ export default function BudgetScreen() {
         visible={showTrendModal}
         onClose={() => setShowTrendModal(false)}
         title={t.budget.monthlyTrend}
-        height="auto"
+        height="full"
       >
         <View className="pt-2.5">
           <Text className="text-sm font-manrope mb-4" style={{ color: theme.textSecondary }}>

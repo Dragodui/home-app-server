@@ -8,14 +8,14 @@ import {
   RefreshControl,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Check, Plus, Calendar, Trash } from "lucide-react-native";
+import { Check, Plus, Calendar, Trash, Repeat, X } from "lucide-react-native";
 import DatePicker from "@/components/ui/date-picker";
 
 import { useAuth } from "@/stores/authStore";
 import { useHome } from "@/stores/homeStore";
 import { useTheme } from "@/stores/themeStore";
 import { useI18n, interpolate } from "@/stores/i18nStore";
-import { taskApi } from "@/lib/api";
+import { taskApi, taskScheduleApi } from "@/lib/api";
 import { Task, TaskAssignment } from "@/lib/types";
 import { useRealtimeRefresh } from "@/lib/useRealtimeRefresh";
 import { useAlert } from "@/components/ui/alert";
@@ -26,11 +26,12 @@ import { userColors } from "@/constants/colors";
 import { TasksSkeleton } from "@/components/skeletons";
 
 type FilterType = "All" | "My" | "By Room";
+type RecurrenceType = "daily" | "weekly" | "monthly";
 
 export default function TasksScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
-  const { home, rooms } = useHome();
+  const { home, rooms, isAdmin } = useHome();
   const { theme } = useTheme();
   const { t } = useI18n();
   const { alert } = useAlert();
@@ -49,6 +50,13 @@ export default function TasksScreen() {
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
   const [creating, setCreating] = useState(false);
+
+  // Schedule modal state
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [scheduleTaskId, setScheduleTaskId] = useState<number | null>(null);
+  const [scheduleRecurrence, setScheduleRecurrence] = useState<RecurrenceType>("daily");
+  const [scheduleUserIds, setScheduleUserIds] = useState<number[]>([]);
+  const [creatingSchedule, setCreatingSchedule] = useState(false);
 
   const loadTasks = useCallback(async () => {
     if (!home || !user) {
@@ -181,6 +189,68 @@ export default function TasksScreen() {
     }
   };
 
+  // Schedule handlers
+  const handleOpenScheduleModal = (taskId: number) => {
+    setScheduleTaskId(taskId);
+    setScheduleRecurrence("daily");
+    setScheduleUserIds([]);
+    setShowScheduleModal(true);
+  };
+
+  const handleCreateSchedule = async () => {
+    if (!home || !scheduleTaskId || scheduleUserIds.length < 2) return;
+
+    setCreatingSchedule(true);
+    try {
+      await taskScheduleApi.create(home.id, {
+        task_id: scheduleTaskId,
+        home_id: home.id,
+        recurrence_type: scheduleRecurrence,
+        user_ids: scheduleUserIds,
+      });
+
+      setShowScheduleModal(false);
+      setScheduleTaskId(null);
+      setScheduleUserIds([]);
+      await loadTasks();
+    } catch (error) {
+      console.error("Error creating schedule:", error);
+      alert(t.common.error, t.tasks.schedule.failedToCreate);
+    } finally {
+      setCreatingSchedule(false);
+    }
+  };
+
+  const handleDeleteSchedule = (task: Task) => {
+    if (!home || !task.schedule) return;
+
+    alert(t.tasks.schedule.deleteSchedule, t.tasks.schedule.deleteScheduleConfirm, [
+      { text: t.common.cancel, style: "cancel" },
+      {
+        text: t.common.delete,
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await taskScheduleApi.delete(home.id, task.schedule!.id);
+            await loadTasks();
+          } catch (error) {
+            console.error(error);
+            alert(t.common.error, t.tasks.schedule.failedToDelete);
+          }
+        },
+      },
+    ]);
+  };
+
+  const getRecurrenceLabel = (type: string) => {
+    switch (type) {
+      case "daily": return t.tasks.schedule.daily;
+      case "weekly": return t.tasks.schedule.weekly;
+      case "monthly": return t.tasks.schedule.monthly;
+      default: return type;
+    }
+  };
+
   const getFilteredTasks = () => {
     if (activeFilter === "My") {
       const myTaskIds = assignments.map((a) => a.task_id);
@@ -239,6 +309,7 @@ export default function TasksScreen() {
     const completed = isTaskCompleted(task);
     const colorIndex = index % userColors.length;
     const completedDate = completed ? getTaskCompletedDate(task) : "";
+    const hasSchedule = !!task.schedule;
 
     return (
       <View
@@ -263,13 +334,26 @@ export default function TasksScreen() {
             </View>
 
             <View className="flex-1">
-              <Text
-                className={`text-lg font-manrope-bold mb-2 ${completed ? "line-through opacity-50" : ""}`}
-                style={{ color: theme.text }}
-                numberOfLines={1}
-              >
-                {task.name}
-              </Text>
+              <View className="flex-row items-center gap-2 mb-2">
+                <Text
+                  className={`text-lg font-manrope-bold flex-1 ${completed ? "line-through opacity-50" : ""}`}
+                  style={{ color: theme.text }}
+                  numberOfLines={1}
+                >
+                  {task.name}
+                </Text>
+                {hasSchedule && (
+                  <View
+                    className="px-2 py-0.5 rounded-full flex-row items-center gap-1"
+                    style={{ backgroundColor: theme.accent.purple + "20" }}
+                  >
+                    <Repeat size={10} color={theme.accent.purple} />
+                    <Text className="text-[10px] font-manrope-bold" style={{ color: theme.accent.purple }}>
+                      {getRecurrenceLabel(task.schedule!.recurrence_type)}
+                    </Text>
+                  </View>
+                )}
+              </View>
               <View className="flex-row items-center flex-wrap gap-2">
                 <View
                   className="w-2 h-2 rounded-full"
@@ -297,14 +381,36 @@ export default function TasksScreen() {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={() => handleDelete(task.id)}
-            hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-            className="p-1"
-            activeOpacity={0.6}
-          >
-            <Trash size={20} color={theme.accent.pink} />
-          </TouchableOpacity>
+          <View className="flex-row items-center gap-2">
+            {isAdmin && !hasSchedule && (
+              <TouchableOpacity
+                onPress={() => handleOpenScheduleModal(task.id)}
+                hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+                className="p-1"
+                activeOpacity={0.6}
+              >
+                <Repeat size={20} color={theme.accent.purple} />
+              </TouchableOpacity>
+            )}
+            {isAdmin && hasSchedule && (
+              <TouchableOpacity
+                onPress={() => handleDeleteSchedule(task)}
+                hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+                className="p-1"
+                activeOpacity={0.6}
+              >
+                <Repeat size={20} color={theme.status.success} />
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              onPress={() => handleDelete(task.id)}
+              hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+              className="p-1"
+              activeOpacity={0.6}
+            >
+              <Trash size={20} color={theme.accent.pink} />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     );
@@ -552,6 +658,127 @@ export default function TasksScreen() {
             loading={creating}
             disabled={!newTaskName.trim() || creating}
             variant="yellow"
+            style={{ marginTop: "auto" }}
+          />
+        </View>
+      </Modal>
+
+      {/* Schedule Modal */}
+      <Modal
+        visible={showScheduleModal}
+        onClose={() => setShowScheduleModal(false)}
+        title={t.tasks.schedule.create}
+        height="full"
+      >
+        <View className="flex-1">
+          {/* Recurrence Type */}
+          <View className="mb-6">
+            <Text
+              className="text-xs font-manrope-bold uppercase tracking-wide mb-3 ml-1"
+              style={{ color: theme.textSecondary }}
+            >
+              {t.tasks.schedule.recurrence}
+            </Text>
+            <View className="flex-row gap-2.5">
+              {(["daily", "weekly", "monthly"] as RecurrenceType[]).map((type) => (
+                <TouchableOpacity
+                  key={type}
+                  className="flex-1 py-3 rounded-[12px] items-center"
+                  style={[
+                    { backgroundColor: theme.surface },
+                    scheduleRecurrence === type && { backgroundColor: theme.accent.purple },
+                  ]}
+                  onPress={() => setScheduleRecurrence(type)}
+                >
+                  <Text
+                    className="text-sm font-manrope-bold"
+                    style={[
+                      { color: theme.textSecondary },
+                      scheduleRecurrence === type && { color: "#1C1C1E" },
+                    ]}
+                  >
+                    {getRecurrenceLabel(type)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {/* Rotation Users */}
+          {home?.memberships && home.memberships.length > 0 && (
+            <View className="mb-6">
+              <Text
+                className="text-xs font-manrope-bold uppercase tracking-wide mb-3 ml-1"
+                style={{ color: theme.textSecondary }}
+              >
+                {t.tasks.schedule.rotationUsers}
+              </Text>
+              <Text
+                className="text-xs font-manrope mb-3 ml-1"
+                style={{ color: theme.textMuted }}
+              >
+                {t.tasks.schedule.rotationHint}
+              </Text>
+              <View className="gap-2">
+                {home.memberships.map((membership, idx) => {
+                  const isSelected = scheduleUserIds.includes(membership.user_id);
+                  const orderIndex = scheduleUserIds.indexOf(membership.user_id);
+                  return (
+                    <TouchableOpacity
+                      key={membership.user_id}
+                      className="flex-row items-center px-4 py-3 rounded-[12px]"
+                      style={[
+                        { backgroundColor: theme.surface },
+                        isSelected && { backgroundColor: theme.accent.purple + "15", borderWidth: 1, borderColor: theme.accent.purple },
+                      ]}
+                      onPress={() =>
+                        setScheduleUserIds((prev) =>
+                          isSelected
+                            ? prev.filter((id) => id !== membership.user_id)
+                            : [...prev, membership.user_id]
+                        )
+                      }
+                    >
+                      {isSelected && (
+                        <View
+                          className="w-6 h-6 rounded-full justify-center items-center mr-3"
+                          style={{ backgroundColor: theme.accent.purple }}
+                        >
+                          <Text className="text-xs font-manrope-bold" style={{ color: "#1C1C1E" }}>
+                            {orderIndex + 1}
+                          </Text>
+                        </View>
+                      )}
+                      <Text
+                        className="text-sm font-manrope-semibold flex-1"
+                        style={{ color: isSelected ? theme.text : theme.textSecondary }}
+                      >
+                        {membership.user?.name || `User ${membership.user_id}`}
+                      </Text>
+                      {isSelected && (
+                        <X size={16} color={theme.textSecondary} />
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+              {scheduleUserIds.length > 0 && scheduleUserIds.length < 2 && (
+                <Text
+                  className="text-xs font-manrope mt-2 ml-1"
+                  style={{ color: theme.status.error }}
+                >
+                  {t.tasks.schedule.selectUsers}
+                </Text>
+              )}
+            </View>
+          )}
+
+          <Button
+            title={t.tasks.schedule.create}
+            onPress={handleCreateSchedule}
+            loading={creatingSchedule}
+            disabled={scheduleUserIds.length < 2 || creatingSchedule}
+            variant="purple"
             style={{ marginTop: "auto" }}
           />
         </View>

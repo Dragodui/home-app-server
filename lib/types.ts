@@ -49,6 +49,26 @@ export interface Task {
   created_at: string;
   room?: Room;
   assignments?: TaskAssignment[];
+  schedule?: TaskSchedule;
+}
+
+export interface TaskSchedule {
+  id: number;
+  task_id: number;
+  recurrence_type: "daily" | "weekly" | "monthly";
+  rotation_user_ids: string; // JSON array of user IDs
+  current_rotation_index: number;
+  next_run_date: string;
+  is_active: boolean;
+  created_at: string;
+  task?: Task;
+}
+
+export interface CreateScheduleForm {
+  task_id: number;
+  home_id: number;
+  recurrence_type: "daily" | "weekly" | "monthly";
+  user_ids: number[];
 }
 
 export interface TaskAssignment {

@@ -7,6 +7,7 @@ import {
   Room,
   Task,
   TaskAssignment,
+  TaskSchedule,
   Bill,
   BillCategory,
   ShoppingCategory,
@@ -16,6 +17,7 @@ import {
   HomeNotification,
   AuthResponse,
   CreateTaskForm,
+  CreateScheduleForm,
   CreateBillForm,
   CreatePollForm,
   CreateCategoryForm,
@@ -316,6 +318,29 @@ export const taskApi = {
   },
 };
 
+// ============ Task Schedule API ============
+export const taskScheduleApi = {
+  create: async (homeId: number, data: CreateScheduleForm): Promise<{ schedule: TaskSchedule }> => {
+    const response = await api.post<{ status: boolean; schedule: TaskSchedule }>(`/homes/${homeId}/tasks/schedules`, data);
+    return { schedule: response.data.schedule };
+  },
+
+  getByHomeId: async (homeId: number): Promise<TaskSchedule[]> => {
+    const response = await api.get<{ status: boolean; schedules: TaskSchedule[] }>(`/homes/${homeId}/tasks/schedules`);
+    return response.data.schedules || [];
+  },
+
+  getByTaskId: async (homeId: number, taskId: number): Promise<TaskSchedule | null> => {
+    const response = await api.get<{ status: boolean; schedule: TaskSchedule | null }>(`/homes/${homeId}/tasks/${taskId}/schedule`);
+    return response.data.schedule;
+  },
+
+  delete: async (homeId: number, scheduleId: number): Promise<{ message: string }> => {
+    const response = await api.delete<{ status: boolean; message: string }>(`/homes/${homeId}/tasks/schedules/${scheduleId}`);
+    return { message: response.data.message };
+  },
+};
+
 // ============ Bill API ============
 export const billApi = {
   create: async (homeId: number, data: CreateBillForm & { bill_category_id?: number }): Promise<{ message: string }> => {
@@ -606,6 +631,7 @@ export type {
   Room,
   Task,
   TaskAssignment,
+  TaskSchedule,
   Bill,
   BillSplit,
   ShoppingCategory,

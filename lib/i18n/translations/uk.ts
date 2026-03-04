@@ -230,6 +230,9 @@ export default {
     unpaid: "Несплачено",
     description: "Опис (Необов'язково)",
     descriptionPlaceholder: "Додайте деталі...",
+    monthlyTrend: "Місячний тренд",
+    last6Months: "Останні 6 місяців",
+    viewReceipt: "Переглянути чек",
   },
 
   // Polls

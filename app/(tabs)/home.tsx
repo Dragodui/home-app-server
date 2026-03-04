@@ -15,12 +15,13 @@ import {
   Home as HomeIcon,
   BarChart2,
   User,
+  Bell,
 } from "lucide-react-native";
 import { useAuth } from "@/stores/authStore";
 import { useHome } from "@/stores/homeStore";
 import { useTheme } from "@/stores/themeStore";
 import { useI18n, interpolate } from "@/stores/i18nStore";
-import { taskApi, pollApi, billApi } from "@/lib/api";
+import { taskApi, pollApi, billApi, notificationApi } from "@/lib/api";
 import { TaskAssignment, Poll } from "@/lib/types";
 import { useRealtimeRefresh } from "@/lib/useRealtimeRefresh";
 import Card from "@/components/ui/card";
@@ -41,6 +42,7 @@ export default function HomeScreen() {
   const [monthlySpend, setMonthlySpend] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -63,10 +65,12 @@ export default function HomeScreen() {
     }
 
     try {
-      const [assignmentData, pollsData, billsData] = await Promise.all([
+      const [assignmentData, pollsData, billsData, userNotifs, homeNotifs] = await Promise.all([
         taskApi.getClosestAssignment(home.id, user.id).catch(() => null),
         pollApi.getByHomeId(home.id).catch(() => []),
         billApi.getByHomeId(home.id).catch(() => []),
+        notificationApi.getUserNotifications().catch(() => []),
+        notificationApi.getHomeNotifications(home.id).catch(() => []),
       ]);
 
       setNextAssignment(assignmentData);
@@ -87,6 +91,9 @@ export default function HomeScreen() {
         return sum;
       }, 0);
       setMonthlySpend(total);
+
+      const allNotifs = [...(userNotifs || []), ...(homeNotifs || [])];
+      setUnreadCount(allNotifs.filter((n) => !n.read).length);
     } catch (error) {
       console.error("Error loading dashboard:", error);
     } finally {
@@ -105,7 +112,7 @@ export default function HomeScreen() {
     loadDashboardData(false);
   }, [authLoading, isAuthenticated, home, user, loadDashboardData, router]);
 
-  useRealtimeRefresh(["TASK", "POLL", "BILL", "BILL_CATEGORY"], () => loadDashboardData(true));
+  useRealtimeRefresh(["TASK", "POLL", "BILL", "BILL_CATEGORY", "NOTIFICATION", "HOME_NOTIFICATION"], () => loadDashboardData(true));
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -124,7 +131,7 @@ export default function HomeScreen() {
     loadDashboardData();
   }, [authLoading, isAuthenticated, home, user, loadDashboardData, router]);
 
-  useRealtimeRefresh(["TASK", "POLL", "BILL", "BILL_CATEGORY"], loadDashboardData);
+  useRealtimeRefresh(["TASK", "POLL", "BILL", "BILL_CATEGORY", "NOTIFICATION", "HOME_NOTIFICATION"], loadDashboardData);
 
   if (authLoading || homeLoading || isLoading) {
     return <HomeSkeleton />;
@@ -223,26 +230,46 @@ export default function HomeScreen() {
               {user?.name?.split(" ")[0] || "there"}
             </Text>
           </View>
-          <TouchableOpacity
-            onPress={() => router.push("/(tabs)/profile")}
-            activeOpacity={0.8}
-          >
-            <View
-              className="w-14 h-14 rounded-28 border-2 overflow-hidden justify-center items-center"
-              style={{ borderColor: theme.accent.purple }}
+          <View className="flex-row items-center gap-3">
+            <TouchableOpacity
+              onPress={() => router.push("/notifications")}
+              activeOpacity={0.7}
+              className="w-12 h-12 rounded-24 justify-center items-center"
+              style={{ backgroundColor: theme.surface }}
             >
-              {user?.avatar ? (
-                <Image source={{ uri: user.avatar }} className="w-full h-full" />
-              ) : (
+              <Bell size={22} color={theme.text} />
+              {unreadCount > 0 && (
                 <View
-                  className="w-full h-full justify-center items-center"
-                  style={{ backgroundColor: theme.surface }}
+                  className="absolute -top-1 -right-1 min-w-5 h-5 rounded-10 justify-center items-center px-1"
+                  style={{ backgroundColor: theme.accent.pink }}
                 >
-                  <User size={28} color={theme.textSecondary} />
+                  <Text className="text-[11px] font-manrope-bold text-white">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </Text>
                 </View>
               )}
-            </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => router.push("/(tabs)/profile")}
+              activeOpacity={0.8}
+            >
+              <View
+                className="w-14 h-14 rounded-28 border-2 overflow-hidden justify-center items-center"
+                style={{ borderColor: theme.accent.purple }}
+              >
+                {user?.avatar ? (
+                  <Image source={{ uri: user.avatar }} className="w-full h-full" />
+                ) : (
+                  <View
+                    className="w-full h-full justify-center items-center"
+                    style={{ backgroundColor: theme.surface }}
+                  >
+                    <User size={28} color={theme.textSecondary} />
+                  </View>
+                )}
+              </View>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Hero Card - Up Next Task */}

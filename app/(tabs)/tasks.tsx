@@ -306,7 +306,6 @@ export default function TasksScreen() {
     const colorIndex = index % userColors.length;
     const completedDate = completed ? getTaskCompletedDate(task) : "";
     const hasSchedule = !!task.schedule;
-
     return (
       <View key={task.id} className="rounded-24 p-5" style={{ backgroundColor: theme.surface }}>
         <View className="flex-row items-center gap-4">

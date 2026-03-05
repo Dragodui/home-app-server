@@ -126,7 +126,6 @@ export default function LoginScreen() {
             autoComplete="password"
             error={error || undefined}
           />
-
           <Button
             title={t.auth.getStarted}
             onPress={handleLogin}
@@ -135,7 +134,8 @@ export default function LoginScreen() {
             variant="purple"
             className="mt-6"
           />
-
+<Text className="text-gray-300 text-center text-sm font-manrope mt-4">Forgot password?</Text>
+          
           <View className="flex-row items-center my-5">
             <View className="flex-1 h-px" style={{ backgroundColor: theme.border }} />
             <Text className="mx-4 text-sm font-manrope" style={{ color: theme.textSecondary }}>

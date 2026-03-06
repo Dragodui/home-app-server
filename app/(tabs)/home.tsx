@@ -185,13 +185,13 @@ export default function HomeScreen() {
             <TouchableOpacity
               onPress={() => router.push("/notifications")}
               activeOpacity={0.7}
-              className="w-12 h-12 rounded-24 justify-center items-center"
+              className="w-12 h-12 rounded-full justify-center items-center"
               style={{ backgroundColor: theme.surface }}
             >
               <Bell size={22} color={theme.text} />
               {unreadCount > 0 && (
                 <View
-                  className="absolute -top-1 -right-1 min-w-5 h-5 rounded-10 justify-center items-center px-1"
+                  className="absolute -top-1 -right-1 min-w-5 min-h-5 rounded-full justify-center items-center px-1"
                   style={{ backgroundColor: theme.accent.pink }}
                 >
                   <Text className="text-[11px] font-manrope-bold text-white">

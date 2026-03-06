@@ -120,7 +120,7 @@ export default function NotificationsScreen() {
         {notifications.length === 0 ? (
           <View className="flex-1 justify-center items-center pt-20">
             <View
-              className="w-25 h-25 rounded-full justify-center items-center mb-6"
+              className="w-24 h-24 rounded-full justify-center items-center mb-6"
               style={{ backgroundColor: theme.surface }}
             >
               <Bell size={48} color={theme.textSecondary} />
@@ -146,7 +146,7 @@ export default function NotificationsScreen() {
               >
                 <View className="flex-row items-start gap-3">
                   <View
-                    className="w-10 h-10 rounded-xl justify-center items-center"
+                    className="w-10 h-10 rounded-full justify-center items-center"
                     style={{ backgroundColor: theme.accent.purple }}
                   >
                     <Bell size={18} color="#1C1C1E" />

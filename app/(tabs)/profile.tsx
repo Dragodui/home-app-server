@@ -410,7 +410,6 @@ export default function ProfileScreen() {
           />
         </View>
       </Modal>
-
     </View>
   );
 }

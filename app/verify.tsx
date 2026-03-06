@@ -97,16 +97,15 @@ export default function VerifyEmailScreen() {
                   className="w-24 h-24 rounded-full justify-center items-center mb-6"
                   style={{ backgroundColor: verified ? theme.status.success : theme.status.error }}
                 >
-                  {verified ? (
-                    <CheckCircle size={48} color="#FFFFFF" />
-                  ) : (
-                    <XCircle size={48} color="#FFFFFF" />
-                  )}
+                  {verified ? <CheckCircle size={48} color="#FFFFFF" /> : <XCircle size={48} color="#FFFFFF" />}
                 </View>
                 <Text className="text-[28px] font-manrope-bold mb-3 text-center" style={{ color: theme.text }}>
                   {verified ? t.verify.emailVerified : t.verify.verificationFailed}
                 </Text>
-                <Text className="text-base font-manrope text-center leading-6 mb-8 px-4" style={{ color: theme.textSecondary }}>
+                <Text
+                  className="text-base font-manrope text-center leading-6 mb-8 px-4"
+                  style={{ color: theme.textSecondary }}
+                >
                   {verified ? t.verify.verifiedMessage : error || t.verify.linkExpired}
                 </Text>
               </>
@@ -137,8 +136,13 @@ export default function VerifyEmailScreen() {
             >
               <CheckCircle size={48} color="#FFFFFF" />
             </View>
-            <Text className="text-[28px] font-manrope-bold mb-3 text-center" style={{ color: theme.text }}>{t.verify.emailVerified}</Text>
-            <Text className="text-base font-manrope text-center leading-6 mb-8 px-4" style={{ color: theme.textSecondary }}>
+            <Text className="text-[28px] font-manrope-bold mb-3 text-center" style={{ color: theme.text }}>
+              {t.verify.emailVerified}
+            </Text>
+            <Text
+              className="text-base font-manrope text-center leading-6 mb-8 px-4"
+              style={{ color: theme.textSecondary }}
+            >
               {t.verify.verifiedMessage}
             </Text>
             <Button
@@ -174,12 +178,21 @@ export default function VerifyEmailScreen() {
             <Mail size={48} color="#1C1C1E" />
           </View>
 
-          <Text className="text-[28px] font-manrope-bold mb-3 text-center" style={{ color: theme.text }}>{t.verify.title}</Text>
-          <Text className="text-base font-manrope text-center leading-6 mb-8 px-4" style={{ color: theme.textSecondary }}>
+          <Text className="text-[28px] font-manrope-bold mb-3 text-center" style={{ color: theme.text }}>
+            {t.verify.title}
+          </Text>
+          <Text
+            className="text-base font-manrope text-center leading-6 mb-8 px-4"
+            style={{ color: theme.textSecondary }}
+          >
             {sent ? interpolate(t.verify.sentMessage, { email }) : interpolate(t.verify.checkInbox, { email })}
           </Text>
 
-          {error ? <Text className="text-sm font-manrope-medium mb-4 text-center" style={{ color: theme.status.error }}>{error}</Text> : null}
+          {error ? (
+            <Text className="text-sm font-manrope-medium mb-4 text-center" style={{ color: theme.status.error }}>
+              {error}
+            </Text>
+          ) : null}
 
           {!sent && (
             <Button

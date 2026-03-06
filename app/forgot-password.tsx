@@ -56,10 +56,14 @@ export default function ForgotPasswordScreen() {
           >
             <CheckCircle size={64} color={theme.accent.purple} />
           </View>
-          <Text className="text-[28px] font-manrope-bold mb-4 text-center" style={{ color: theme.text }}>Check Your Email</Text>
+          <Text className="text-[28px] font-manrope-bold mb-4 text-center" style={{ color: theme.text }}>
+            Check Your Email
+          </Text>
           <Text className="text-base font-manrope text-center leading-6 mb-8" style={{ color: theme.textSecondary }}>
             We've sent a password reset link to{"\n"}
-            <Text className="font-manrope-bold" style={{ color: theme.text }}>{email}</Text>
+            <Text className="font-manrope-bold" style={{ color: theme.text }}>
+              {email}
+            </Text>
           </Text>
           <Button title="Back to Login" onPress={() => router.replace("/login")} variant="purple" className="w-full" />
         </View>
@@ -68,7 +72,11 @@ export default function ForgotPasswordScreen() {
   }
 
   return (
-    <KeyboardAvoidingView className="flex-1" style={{ backgroundColor: theme.background }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+    <KeyboardAvoidingView
+      className="flex-1"
+      style={{ backgroundColor: theme.background }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 32, paddingTop: insets.top + 16 }}
         keyboardShouldPersistTaps="handled"
@@ -89,7 +97,9 @@ export default function ForgotPasswordScreen() {
           >
             <Mail size={40} color="#1C1C1E" />
           </View>
-          <Text className="text-[32px] font-manrope-bold mb-3" style={{ color: theme.text }}>Forgot Password?</Text>
+          <Text className="text-[32px] font-manrope-bold mb-3" style={{ color: theme.text }}>
+            Forgot Password?
+          </Text>
           <Text className="text-base font-manrope leading-6" style={{ color: theme.textSecondary }}>
             No worries! Enter your email and we'll send you a reset link.
           </Text>
@@ -121,9 +131,13 @@ export default function ForgotPasswordScreen() {
         </View>
 
         <View className="flex-row justify-center items-center pt-6" style={{ paddingBottom: insets.bottom + 24 }}>
-          <Text className="text-sm font-manrope" style={{ color: theme.textSecondary }}>Remember your password? </Text>
+          <Text className="text-sm font-manrope" style={{ color: theme.textSecondary }}>
+            Remember your password?{" "}
+          </Text>
           <TouchableOpacity onPress={() => router.replace("/login")}>
-            <Text className="text-sm font-manrope-bold underline" style={{ color: theme.text }}>Sign In</Text>
+            <Text className="text-sm font-manrope-bold underline" style={{ color: theme.text }}>
+              Sign In
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

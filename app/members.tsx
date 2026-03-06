@@ -152,16 +152,9 @@ export default function MembersScreen() {
     const isMemberAdmin = member.role === "admin";
 
     return (
-      <View
-        key={member.id}
-        className="flex-row items-center p-4 rounded-20"
-        style={{ backgroundColor: theme.surface }}
-      >
+      <View key={member.id} className="flex-row items-center p-4 rounded-20" style={{ backgroundColor: theme.surface }}>
         {/* Avatar */}
-        <View
-          className="w-12 h-12 rounded-full overflow-hidden mr-3.5"
-          style={{ backgroundColor: theme.background }}
-        >
+        <View className="w-12 h-12 rounded-full overflow-hidden mr-3.5" style={{ backgroundColor: theme.background }}>
           {member.user?.avatar ? (
             <Image source={{ uri: member.user.avatar }} className="w-full h-full" />
           ) : (
@@ -194,10 +187,7 @@ export default function MembersScreen() {
                 style={{ backgroundColor: `${theme.accent.yellow}20` }}
               >
                 <Clock size={12} color={theme.accent.yellow} />
-                <Text
-                  className="text-xs font-manrope-semibold"
-                  style={{ color: theme.accent.yellow }}
-                >
+                <Text className="text-xs font-manrope-semibold" style={{ color: theme.accent.yellow }}>
                   {t.members.pending}
                 </Text>
               </View>
@@ -245,7 +235,8 @@ export default function MembersScreen() {
             </TouchableOpacity>
           </View>
         ) : (
-          isAdmin && !isCurrentUser && (
+          isAdmin &&
+          !isCurrentUser && (
             <View className="flex-row gap-2 ml-2">
               <TouchableOpacity
                 className="w-10 h-10 rounded-14 justify-center items-center"
@@ -308,9 +299,7 @@ export default function MembersScreen() {
                 <Text className="text-lg font-manrope-bold mb-3" style={{ color: theme.text }}>
                   {t.members.pendingRequests} ({pendingMembers.length})
                 </Text>
-                <View className="gap-3">
-                  {pendingMembers.map((member) => renderMemberCard(member, true))}
-                </View>
+                <View className="gap-3">{pendingMembers.map((member) => renderMemberCard(member, true))}</View>
               </View>
             )}
 
@@ -323,9 +312,7 @@ export default function MembersScreen() {
                 </Text>
               </View>
             ) : (
-              <View className="gap-3">
-                {members.map((member) => renderMemberCard(member))}
-              </View>
+              <View className="gap-3">{members.map((member) => renderMemberCard(member))}</View>
             )}
           </>
         )}

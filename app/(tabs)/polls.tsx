@@ -116,22 +116,26 @@ export default function PollsScreen() {
   const handleDeletePoll = async (pollId: number) => {
     if (!home) return;
 
-    alert(t.polls.deletePoll || "Delete Poll", t.polls.deletePollConfirm || "Are you sure you want to delete this poll?", [
-      { text: t.common.cancel, style: "cancel" },
-      {
-        text: t.common.delete || "Delete",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await pollApi.delete(home.id, pollId);
-            await loadPolls();
-          } catch (error) {
-            console.error("Error deleting poll:", error);
-            alert(t.common.error, t.polls.failedToDelete || "Failed to delete poll");
-          }
+    alert(
+      t.polls.deletePoll || "Delete Poll",
+      t.polls.deletePollConfirm || "Are you sure you want to delete this poll?",
+      [
+        { text: t.common.cancel, style: "cancel" },
+        {
+          text: t.common.delete || "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await pollApi.delete(home.id, pollId);
+              await loadPolls();
+            } catch (error) {
+              console.error("Error deleting poll:", error);
+              alert(t.common.error, t.polls.failedToDelete || "Failed to delete poll");
+            }
+          },
         },
-      },
-    ]);
+      ],
+    );
   };
 
   const handleUnvote = async (pollId: number) => {
@@ -352,7 +356,6 @@ export default function PollsScreen() {
             );
           })
         )}
-
       </ScrollView>
 
       {/* Create Poll Modal */}

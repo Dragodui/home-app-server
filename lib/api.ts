@@ -267,7 +267,9 @@ export const homeApi = {
   },
 
   updateMemberRole: async (homeId: number, userId: number, role: string): Promise<{ message: string }> => {
-    const response = await api.patch<{ status: boolean; message: string }>(`/homes/${homeId}/members/${userId}/role`, { role });
+    const response = await api.patch<{ status: boolean; message: string }>(`/homes/${homeId}/members/${userId}/role`, {
+      role,
+    });
     return { message: response.data.message };
   },
 };

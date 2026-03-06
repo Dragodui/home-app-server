@@ -149,7 +149,11 @@ const BarChart = ({
                 textAnchor="middle"
                 fontWeight="700"
               >
-                {item.total >= 1000 ? `${(item.total / 1000).toFixed(1)}k` : item.total % 1 === 0 ? item.total.toFixed(0) : item.total.toFixed(2)}
+                {item.total >= 1000
+                  ? `${(item.total / 1000).toFixed(1)}k`
+                  : item.total % 1 === 0
+                    ? item.total.toFixed(0)
+                    : item.total.toFixed(2)}
               </SvgText>
             )}
           </React.Fragment>
@@ -739,7 +743,8 @@ export default function BudgetScreen() {
               {selectedIds.map((uid, index) => {
                 const otherIds = selectedIds.filter((id) => id !== uid);
                 const otherSum = otherIds.reduce((sum, id) => sum + (parseFloat(amounts[id] || "0") || 0), 0);
-                const allOthersFilled = otherIds.length > 0 && otherIds.every((id) => amounts[id] && parseFloat(amounts[id]) > 0);
+                const allOthersFilled =
+                  otherIds.length > 0 && otherIds.every((id) => amounts[id] && parseFloat(amounts[id]) > 0);
                 const isLastEmpty = !amounts[uid] && allOthersFilled && totalAmount > 0;
                 const autoValue = isLastEmpty ? Math.max(0, totalAmount - otherSum).toFixed(2) : "";
 
@@ -918,7 +923,8 @@ export default function BudgetScreen() {
                     ) : null}
                     {bill.periodStart && bill.periodEnd && (
                       <Text className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
-                        {new Date(bill.periodStart).toLocaleDateString("pl-PL")} – {new Date(bill.periodEnd).toLocaleDateString("pl-PL")}
+                        {new Date(bill.periodStart).toLocaleDateString("pl-PL")} –{" "}
+                        {new Date(bill.periodEnd).toLocaleDateString("pl-PL")}
                       </Text>
                     )}
                   </View>

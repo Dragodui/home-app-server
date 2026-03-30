@@ -8,6 +8,8 @@
     "android": "npx expo start --android",
     "ios": "npx expo start --ios",
     "web": "npx expo start --web",
+    "build:web": "npx expo export -p web",
+    "preview:web": "npx serve dist",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write ."

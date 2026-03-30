@@ -25,7 +25,13 @@
       "package": "app.rork.household-assistant-api"
     },
     "web": {
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "name": "Household Manager",
+      "shortName": "HomeManager",
+      "themeColor": "#1C1C1E",
+      "backgroundColor": "#FFFFFF",
+      "display": "standalone",
+      "output": "single"
     },
     "plugins": [
       [

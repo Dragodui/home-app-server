@@ -12,7 +12,6 @@ import {
   Pencil,
   Plus,
   Receipt,
-  ScanLine,
   Trash,
   TrendingUp,
   Users,
@@ -56,31 +55,32 @@ const DonutChart = ({
   return (
     <View className="justify-center items-center" style={{ width: size, height: size }}>
       <Svg width={size} height={size}>
-        {total > 0 && data.map((item, index) => {
-          const percentage = item.value / total;
-          const strokeLength = circumference * percentage;
-          const angle = percentage * 360;
+        {total > 0 &&
+          data.map((item, index) => {
+            const percentage = item.value / total;
+            const strokeLength = circumference * percentage;
+            const angle = percentage * 360;
 
-          const circle = (
-            <Circle
-              key={index}
-              cx={center}
-              cy={center}
-              r={radius}
-              stroke={item.color}
-              strokeWidth={strokeWidth}
-              fill="transparent"
-              strokeDasharray={[strokeLength, circumference]}
-              strokeDashoffset={0}
-              rotation={currentAngle}
-              origin={`${center}, ${center}`}
-              strokeLinecap="round"
-            />
-          );
+            const circle = (
+              <Circle
+                key={index}
+                cx={center}
+                cy={center}
+                r={radius}
+                stroke={item.color}
+                strokeWidth={strokeWidth}
+                fill="transparent"
+                strokeDasharray={[strokeLength, circumference]}
+                strokeDashoffset={0}
+                rotation={currentAngle}
+                origin={`${center}, ${center}`}
+                strokeLinecap="round"
+              />
+            );
 
-          currentAngle += angle;
-          return circle;
-        })}
+            currentAngle += angle;
+            return circle;
+          })}
       </Svg>
       <View className="absolute justify-center items-center">
         <Text className="text-2xl font-manrope-bold" style={{ color: theme.text }}>
@@ -171,7 +171,7 @@ export default function BudgetScreen() {
   const { t } = useI18n();
   const { alert } = useAlert();
 
-  const [bills, setBills] = useState<Bill[]>([]);
+  const [allBills, setAllBills] = useState<Bill[]>([]);
   const [categories, setCategories] = useState<BillCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -252,17 +252,18 @@ export default function BudgetScreen() {
 
   const loadData = useCallback(async () => {
     if (!home) {
+      setAllBills([]);
+      setCategories([]);
       setIsLoading(false);
       return;
     }
 
     try {
-      const [billsData, categoriesData, allBillsData] = await Promise.all([
-        billApi.getByHomeId(home.id, filterCategoryId ?? undefined).catch(() => []),
-        billCategoryApi.getAll(home.id).catch(() => []),
+      const [allBillsData, categoriesData] = await Promise.all([
         billApi.getByHomeId(home.id).catch(() => []),
+        billCategoryApi.getAll(home.id).catch(() => []),
       ]);
-      setBills(billsData || []);
+      setAllBills(allBillsData || []);
       setCategories(categoriesData || []);
 
       // Compute monthly trends (last 6 months)
@@ -286,7 +287,7 @@ export default function BudgetScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [home, filterCategoryId]);
+  }, [home]);
 
   useEffect(() => {
     loadData();
@@ -545,15 +546,8 @@ export default function BudgetScreen() {
     }
   };
 
-  // Auto-process receipt when image is selected or language changes
-  useEffect(() => {
-    if (selectedImageUri && !ocrResult && !scanning) {
-      handleProcessReceipt();
-    }
-  }, [selectedImageUri, ocrResult]);
-
   // Step 2: Upload + process with OCR
-  const handleProcessReceipt = async () => {
+  const handleProcessReceipt = useCallback(async () => {
     if (!selectedImageUri) return;
 
     setScanning(true);
@@ -588,7 +582,23 @@ export default function BudgetScreen() {
     } finally {
       setScanning(false);
     }
-  };
+  }, [
+    alert,
+    selectedFileName,
+    selectedFileType,
+    selectedImageUri,
+    selectedLanguage,
+    t.budget.noTotalDetected,
+    t.budget.scanFailed,
+    t.common.error,
+  ]);
+
+  // Auto-process receipt when image is selected
+  useEffect(() => {
+    if (selectedImageUri && !ocrResult && !scanning) {
+      handleProcessReceipt();
+    }
+  }, [selectedImageUri, ocrResult, scanning, handleProcessReceipt]);
 
   const getCategoryColor = (categoryId?: number) => {
     const category = categories.find((c) => c.id === categoryId);
@@ -618,19 +628,37 @@ export default function BudgetScreen() {
     return isAdmin || bill.uploadedBy === user?.id;
   };
 
-  const chartData = categories
-    .map((cat) => {
-      const catBills = bills.filter((b) => b.billCategoryId === cat.id);
-      const total = catBills.reduce((sum, b) => sum + b.totalAmount, 0);
-      return {
-        value: total,
-        color: cat.color || theme.accent.yellow,
-        name: cat.name,
-      };
-    })
-    .filter((d) => d.value > 0);
+  const visibleBills =
+    filterCategoryId === null ? allBills : allBills.filter((bill) => bill.billCategoryId === filterCategoryId);
 
-  const uncategorizedBills = bills.filter((b) => !b.billCategoryId);
+  const totalSpend = visibleBills.reduce((sum, b) => sum + b.totalAmount, 0);
+  const chartData =
+    filterCategoryId === null
+      ? categories
+          .map((cat) => {
+            const catBills = allBills.filter((b) => b.billCategoryId === cat.id);
+            const total = catBills.reduce((sum, b) => sum + b.totalAmount, 0);
+            return {
+              value: total,
+              color: cat.color || theme.accent.yellow,
+              name: cat.name,
+            };
+          })
+          .filter((d) => d.value > 0)
+      : (() => {
+          const activeCategory = categories.find((cat) => cat.id === filterCategoryId);
+          return activeCategory && totalSpend > 0
+            ? [
+                {
+                  value: totalSpend,
+                  color: activeCategory.color || theme.accent.yellow,
+                  name: activeCategory.name,
+                },
+              ]
+            : [];
+        })();
+
+  const uncategorizedBills = filterCategoryId === null ? allBills.filter((b) => !b.billCategoryId) : [];
   if (uncategorizedBills.length > 0) {
     const total = uncategorizedBills.reduce((sum, b) => sum + b.totalAmount, 0);
     chartData.push({
@@ -640,10 +668,8 @@ export default function BudgetScreen() {
     });
   }
 
-  const totalSpend = bills.reduce((sum, b) => sum + b.totalAmount, 0);
-
   // Bills that have OCR data with actual content
-  const receiptBills = bills.filter((b) => {
+  const receiptBills = visibleBills.filter((b) => {
     if (!b.ocrData) return false;
     const data = b.ocrData as Record<string, any>;
     return data.vendor || data.total || (data.items && data.items.length > 0);
@@ -740,7 +766,7 @@ export default function BudgetScreen() {
 
           {mode === "manual" && (
             <View className="gap-2">
-              {selectedIds.map((uid, index) => {
+              {selectedIds.map((uid, _index) => {
                 const otherIds = selectedIds.filter((id) => id !== uid);
                 const otherSum = otherIds.reduce((sum, id) => sum + (parseFloat(amounts[id] || "0") || 0), 0);
                 const allOthersFilled =
@@ -888,7 +914,7 @@ export default function BudgetScreen() {
 
         {/* Bills list */}
         <View className="gap-3">
-          {bills.map((bill) => {
+          {visibleBills.map((bill) => {
             const isExpanded = expandedBillId === bill.id;
             const splits = bill.splits ?? [];
             const userSplit = splits.find((s) => s.userId === user?.id);
@@ -1014,7 +1040,7 @@ export default function BudgetScreen() {
               </TouchableOpacity>
             );
           })}
-          {bills.length === 0 && (
+          {visibleBills.length === 0 && (
             <Text className="text-center mt-10" style={{ color: theme.textSecondary }}>
               {t.budget.noExpenses}
             </Text>

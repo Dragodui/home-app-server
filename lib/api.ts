@@ -1,4 +1,3 @@
-import axios from "axios";
 import { Platform } from "react-native";
 import { deepCamelToSnake, deepSnakeToCamel } from "./caseConverter";
 import { secureStorage } from "./secureStorage";
@@ -32,77 +31,156 @@ import type {
 } from "./types";
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? "";
+const API_PREFIX = "/api";
 
-export const api = axios.create({
-  baseURL: `${API_BASE_URL}/api`,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+type ApiRequestOptions = {
+  params?: Record<string, unknown>;
+  headers?: Record<string, string>;
+  body?: unknown;
+  rawBody?: BodyInit;
+  method?: string;
+};
 
-// Request interceptor - add auth token
-api.interceptors.request.use(
-  async (config) => {
-    const token = await secureStorage.getItem("auth_token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
+type ApiResponse<T> = {
+  data: T;
+  status: number;
+};
 
-// Request interceptor - convert camelCase to snake_case
-api.interceptors.request.use(
-  (config) => {
-    if (
-      config.data &&
-      typeof config.data === "object" &&
-      !(config.data instanceof FormData) &&
-      !(config.data instanceof URLSearchParams)
-    ) {
-      config.data = deepCamelToSnake(config.data);
-    }
-    if (config.params && typeof config.params === "object") {
-      config.params = deepCamelToSnake(config.params);
-    }
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
+type ApiErrorResponse = {
+  status: number;
+  data: unknown;
+};
 
-// Response interceptor - convert snake_case to camelCase
-api.interceptors.response.use(
-  (response) => {
-    if (response.data && typeof response.data === "object") {
-      response.data = deepSnakeToCamel(response.data);
-    }
-    return response;
-  },
-  (error) => {
-    if (error.response?.data && typeof error.response.data === "object") {
-      error.response.data = deepSnakeToCamel(error.response.data);
-    }
-    return Promise.reject(error);
-  },
-);
+export type ApiError = Error & {
+  status?: number;
+  response?: ApiErrorResponse;
+};
 
-// Response interceptor - handle 401
-// Only clear stored credentials when the token is definitively invalid or revoked.
-// Do NOT clear on every 401 - transient failures (CORS, network) would wipe auth state.
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    if (error.response?.status === 401) {
-      const message = error.response?.data?.error ?? "";
-      if (message === "token revoked" || message === "invalid token") {
-        await secureStorage.removeItem("auth_token");
-        await secureStorage.removeItem("user");
+function buildUrl(path: string, params?: Record<string, unknown>) {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const url = new URL(`${API_PREFIX}${normalizedPath}`, API_BASE_URL || "http://localhost");
+
+  if (params) {
+    for (const [key, value] of Object.entries(params)) {
+      if (value === undefined || value === null) continue;
+      if (Array.isArray(value)) {
+        for (const item of value) url.searchParams.append(key, String(item));
+        continue;
       }
+      url.searchParams.set(key, String(value));
     }
-    return Promise.reject(error);
-  },
-);
+  }
+
+  if (API_BASE_URL) {
+    return url.toString();
+  }
+
+  return `${url.pathname}${url.search}`;
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value) && !(value instanceof FormData);
+}
+
+async function getAuthHeaders() {
+  const token = await secureStorage.getItem("auth_token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+async function request<T>(path: string, options: ApiRequestOptions = {}): Promise<ApiResponse<T>> {
+  const headers: Record<string, string> = {
+    ...(await getAuthHeaders()),
+    ...(options.headers ?? {}),
+  };
+
+  let body: BodyInit | undefined = options.rawBody;
+
+  if (!body && options.body !== undefined) {
+    if (options.body instanceof FormData || options.body instanceof URLSearchParams) {
+      body = options.body;
+      if (options.body instanceof FormData) {
+        delete headers["Content-Type"];
+      }
+    } else if (typeof options.body === "string") {
+      body = options.body;
+    } else if (isPlainObject(options.body) || Array.isArray(options.body)) {
+      body = JSON.stringify(deepCamelToSnake(options.body));
+      if (!headers["Content-Type"]) {
+        headers["Content-Type"] = "application/json";
+      }
+    } else {
+      body = String(options.body);
+    }
+  }
+
+  const response = await fetch(buildUrl(path, options.params), {
+    method: options.method ?? "GET",
+    headers,
+    body,
+  });
+
+  const text = await response.text();
+  const contentType = response.headers.get("content-type") ?? "";
+  const data = text
+    ? contentType.includes("application/json")
+      ? deepSnakeToCamel(JSON.parse(text))
+      : (text as unknown)
+    : (null as unknown);
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      await secureStorage.removeItem("auth_token");
+      await secureStorage.removeItem("user");
+    }
+
+    const error = new Error(`Request failed with status ${response.status}`) as ApiError;
+    error.status = response.status;
+    error.response = {
+      status: response.status,
+      data,
+    };
+    throw error;
+  }
+
+  return { data: data as T, status: response.status };
+}
+
+export const api = {
+  get: <T>(path: string, config?: { params?: Record<string, unknown> }) =>
+    request<T>(path, { method: "GET", params: config?.params }),
+  post: <T>(path: string, body?: unknown, config?: { headers?: Record<string, string> }) =>
+    request<T>(path, { method: "POST", body, headers: config?.headers }),
+  put: <T>(path: string, body?: unknown, config?: { headers?: Record<string, string> }) =>
+    request<T>(path, { method: "PUT", body, headers: config?.headers }),
+  patch: <T>(path: string, body?: unknown, config?: { headers?: Record<string, string> }) =>
+    request<T>(path, { method: "PATCH", body, headers: config?.headers }),
+  delete: <T>(path: string, config?: { headers?: Record<string, string> }) =>
+    request<T>(path, { method: "DELETE", headers: config?.headers }),
+};
+
+export function getApiErrorStatus(error: unknown): number | undefined {
+  if (typeof error !== "object" || error === null) return undefined;
+  if ("status" in error && typeof (error as { status?: unknown }).status === "number") {
+    return (error as { status: number }).status;
+  }
+  if (
+    "response" in error &&
+    typeof (error as { response?: { status?: unknown } }).response?.status === "number"
+  ) {
+    return (error as { response: { status: number } }).response.status;
+  }
+  return undefined;
+}
+
+export function getApiErrorMessage(error: unknown, fallback: string): string {
+  if (typeof error !== "object" || error === null) return fallback;
+  const responseData = (error as { response?: { data?: unknown } }).response?.data;
+  if (typeof responseData === "object" && responseData !== null && "error" in responseData) {
+    const message = (responseData as { error?: unknown }).error;
+    if (typeof message === "string" && message) return message;
+  }
+  return fallback;
+}
 
 // ============ Auth API ============
 export const authApi = {
@@ -160,11 +238,10 @@ export const authApi = {
   logout: async () => {
     try {
       await api.post("/auth/logout");
-    } catch {
-      // Proceed with local cleanup even if server call fails
+    } finally {
+      await secureStorage.removeItem("auth_token");
+      await secureStorage.removeItem("user");
     }
-    await secureStorage.removeItem("auth_token");
-    await secureStorage.removeItem("user");
   },
 
   googleSignIn: async (accessToken: string): Promise<AuthResponse> => {
@@ -360,7 +437,6 @@ export const taskApi = {
     return { message: response.data.message };
   },
 
-  // Mark task as completed for current user (auto-assigns if not assigned)
   completeTask: async (homeId: number, taskId: number): Promise<{ message: string }> => {
     const response = await api.patch<{ status: boolean; message: string }>(`/homes/${homeId}/tasks/${taskId}/complete`);
     return { message: response.data.message };
@@ -486,7 +562,6 @@ export const billCategoryApi = {
 
 // ============ Shopping API ============
 export const shoppingApi = {
-  // Categories
   createCategory: async (homeId: number, data: CreateCategoryForm): Promise<{ message: string }> => {
     const response = await api.post<{ status: boolean; message: string }>(`/homes/${homeId}/shopping/categories`, data);
     return { message: response.data.message };
@@ -531,7 +606,6 @@ export const shoppingApi = {
     return { message: response.data.message };
   },
 
-  // Items
   createItem: async (homeId: number, data: CreateItemForm): Promise<{ message: string }> => {
     const response = await api.post<{ status: boolean; message: string }>(`/homes/${homeId}/shopping/items`, data);
     return { message: response.data.message };
@@ -749,8 +823,7 @@ export const imageApi = {
 export const ocrApi = {
   process: async (fileUri: string, fileName: string, mimeType: string, language?: string): Promise<OCRResult> => {
     const formData = new FormData();
-    
-    // Web platform requires File/Blob, React Native requires object with uri
+
     if (Platform.OS === "web") {
       const response = await fetch(fileUri);
       const blob = await response.blob();
@@ -759,7 +832,7 @@ export const ocrApi = {
       // @ts-expect-error - React Native FormData accepts object with uri/name/type
       formData.append("file", { uri: fileUri, name: fileName, type: mimeType });
     }
-    
+
     if (language) formData.append("language", language);
     const response = await api.post<OCRResult>("/ocr/process", formData, {
       headers: { "Content-Type": "multipart/form-data" },

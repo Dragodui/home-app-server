@@ -18,8 +18,8 @@ interface GoogleUser {
 export function useGoogleAuth() {
   const [request, response, promptAsync] = Google.useAuthRequest({
     webClientId: GOOGLE_CLIENT_ID,
-    androidClientId: GOOGLE_ANDROID_CLIENT_ID,
-    iosClientId: GOOGLE_IOS_CLIENT_ID,
+    androidClientId: GOOGLE_ANDROID_CLIENT_ID || "",
+    iosClientId: GOOGLE_IOS_CLIENT_ID || "",
   });
 
   const getUserInfo = async (accessToken: string): Promise<GoogleUser | null> => {

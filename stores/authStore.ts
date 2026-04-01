@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
-import { authApi, userApi } from "@/lib/api";
+import { authApi, getApiErrorMessage, getApiErrorStatus } from "@/lib/api";
 import { secureStorage } from "@/lib/secureStorage";
 import type { User } from "@/lib/types";
 
@@ -64,7 +64,7 @@ export const useAuthStore = create<AuthState>()(
         return { success: true };
       } catch (error: any) {
         console.error("Login error:", error);
-        const errorMessage = error.response?.data?.error || "Login failed";
+        const errorMessage = getApiErrorMessage(error, "Login failed");
         if (errorMessage.toLowerCase().includes("verify") || errorMessage.toLowerCase().includes("verified")) {
           return { success: false, error: errorMessage, needsVerification: true };
         }
@@ -78,7 +78,7 @@ export const useAuthStore = create<AuthState>()(
         return { success: true, needsVerification: true };
       } catch (error: any) {
         console.error("Register error:", error);
-        return { success: false, error: error.response?.data?.error || "Registration failed" };
+        return { success: false, error: getApiErrorMessage(error, "Registration failed") };
       }
     },
 
@@ -86,7 +86,9 @@ export const useAuthStore = create<AuthState>()(
       try {
         await authApi.logout();
       } catch (error) {
-        console.error("Logout error:", error);
+        if (getApiErrorStatus(error) !== 401) {
+          console.error("Logout error:", error);
+        }
       } finally {
         set({ user: null, token: null, isLoading: false, isAuthenticated: false });
       }
@@ -98,7 +100,7 @@ export const useAuthStore = create<AuthState>()(
         return { success: true };
       } catch (error: any) {
         console.error("Verify email error:", error);
-        return { success: false, error: error.response?.data?.error || "Verification failed" };
+        return { success: false, error: getApiErrorMessage(error, "Verification failed") };
       }
     },
 
@@ -108,7 +110,7 @@ export const useAuthStore = create<AuthState>()(
         return { success: true };
       } catch (error: any) {
         console.error("Resend verification error:", error);
-        return { success: false, error: error.response?.data?.error || "Failed to resend verification email" };
+        return { success: false, error: getApiErrorMessage(error, "Failed to resend verification email") };
       }
     },
 
@@ -118,7 +120,7 @@ export const useAuthStore = create<AuthState>()(
         return { success: true };
       } catch (error: any) {
         console.error("Forgot password error:", error);
-        return { success: false, error: error.response?.data?.error || "Failed to send reset email" };
+        return { success: false, error: getApiErrorMessage(error, "Failed to send reset email") };
       }
     },
 
@@ -128,7 +130,7 @@ export const useAuthStore = create<AuthState>()(
         return { success: true };
       } catch (error: any) {
         console.error("Reset password error:", error);
-        return { success: false, error: error.response?.data?.error || "Failed to reset password" };
+        return { success: false, error: getApiErrorMessage(error, "Failed to reset password") };
       }
     },
 
@@ -141,7 +143,7 @@ export const useAuthStore = create<AuthState>()(
         return { success: true };
       } catch (error: any) {
         console.error("Update user error:", error);
-        return { success: false, error: error.response?.data?.error || "Failed to update profile" };
+        return { success: false, error: getApiErrorMessage(error, "Failed to update profile") };
       }
     },
 
@@ -167,7 +169,7 @@ export const useAuthStore = create<AuthState>()(
         return { success: true };
       } catch (error: any) {
         console.error("Google Sign-In error:", error);
-        return { success: false, error: error.response?.data?.error || "Google Sign-In failed" };
+        return { success: false, error: getApiErrorMessage(error, "Google Sign-In failed") };
       }
     },
   })),

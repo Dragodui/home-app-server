@@ -294,7 +294,7 @@ export default function HomeScreen() {
             variant="purple"
             borderRadius={28}
             padding={20}
-            onPress={() => router.push("/polls")}
+            onPress={() => router.push("/(tabs)/polls")}
             style={{ flex: 1, height: 180, justifyContent: "space-between" }}
           >
             <View className="w-11 h-11 rounded-22 border-2 border-black/10 justify-center items-center">

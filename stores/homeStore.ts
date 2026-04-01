@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
-import { homeApi, roomApi } from "@/lib/api";
+import { getApiErrorMessage, getApiErrorStatus, homeApi, roomApi } from "@/lib/api";
 import type { Home, HomeMembership, Room } from "@/lib/types";
 import { type EventModule, wsManager } from "@/lib/websocket";
 import { useAuthStore } from "./authStore";
@@ -129,6 +129,18 @@ export const useHomeStore = create<HomeState>((set, get) => {
         }
       } catch (error: any) {
         console.error("Error loading homes:", error);
+        if (getApiErrorStatus(error) === 401) {
+          set({
+            homes: [],
+            currentHomeId: null,
+            home: null,
+            rooms: [],
+            isAdmin: false,
+            isLoading: false,
+          });
+          await AsyncStorage.removeItem(CURRENT_HOME_KEY);
+          return;
+        }
         set({
           homes: [],
           currentHomeId: null,
@@ -164,7 +176,7 @@ export const useHomeStore = create<HomeState>((set, get) => {
         return { success: true };
       } catch (error: any) {
         console.error("Error creating home:", error);
-        return { success: false, error: error.response?.data?.error || "Failed to create home" };
+        return { success: false, error: getApiErrorMessage(error, "Failed to create home") };
       }
     },
 
@@ -174,7 +186,7 @@ export const useHomeStore = create<HomeState>((set, get) => {
         return { success: true, error: result.message };
       } catch (error: any) {
         console.error("Error joining home:", error);
-        return { success: false, error: error.response?.data?.error || "Failed to join home" };
+        return { success: false, error: getApiErrorMessage(error, "Failed to join home") };
       }
     },
 
@@ -211,7 +223,7 @@ export const useHomeStore = create<HomeState>((set, get) => {
         return { success: true };
       } catch (error: any) {
         console.error("Error leaving home:", error);
-        return { success: false, error: error.response?.data?.error || "Failed to leave home" };
+        return { success: false, error: getApiErrorMessage(error, "Failed to leave home") };
       }
     },
 
@@ -248,7 +260,7 @@ export const useHomeStore = create<HomeState>((set, get) => {
         return { success: true };
       } catch (error: any) {
         console.error("Error deleting home:", error);
-        return { success: false, error: error.response?.data?.error || "Failed to delete home" };
+        return { success: false, error: getApiErrorMessage(error, "Failed to delete home") };
       }
     },
 
@@ -262,7 +274,7 @@ export const useHomeStore = create<HomeState>((set, get) => {
         return { success: true };
       } catch (error: any) {
         console.error("Error removing member:", error);
-        return { success: false, error: error.response?.data?.error || "Failed to remove member" };
+        return { success: false, error: getApiErrorMessage(error, "Failed to remove member") };
       }
     },
 
@@ -276,7 +288,7 @@ export const useHomeStore = create<HomeState>((set, get) => {
         return { success: true };
       } catch (error: any) {
         console.error("Error regenerating invite code:", error);
-        return { success: false, error: error.response?.data?.error || "Failed to regenerate invite code" };
+        return { success: false, error: getApiErrorMessage(error, "Failed to regenerate invite code") };
       }
     },
 
@@ -290,7 +302,7 @@ export const useHomeStore = create<HomeState>((set, get) => {
         return { success: true };
       } catch (error: any) {
         console.error("Error creating room:", error);
-        return { success: false, error: error.response?.data?.error || "Failed to create room" };
+        return { success: false, error: getApiErrorMessage(error, "Failed to create room") };
       }
     },
 
@@ -304,7 +316,7 @@ export const useHomeStore = create<HomeState>((set, get) => {
         return { success: true };
       } catch (error: any) {
         console.error("Error deleting room:", error);
-        return { success: false, error: error.response?.data?.error || "Failed to delete room" };
+        return { success: false, error: getApiErrorMessage(error, "Failed to delete room") };
       }
     },
 

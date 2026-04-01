@@ -1,5 +1,9 @@
 # Household Manager App
 
+This repository now contains the monorepo root. The Expo client lives in `client/` and has its own README:
+
+[Client README](./client/README.md)
+
 ## Tech Stack
 
 [![Stack](https://skillicons.dev/icons?i=golang,docker,postgresql,redis,gcp,aws,prometheus,grafana&theme=dark&perline=15)]()

@@ -399,12 +399,12 @@ func TestSecurityHeaders(t *testing.T) {
 	assert.Equal(t, "DENY", headers.Get("X-Frame-Options"))
 	assert.Equal(t, "nosniff", headers.Get("X-Content-Type-Options"))
 	assert.Equal(t, "1; mode=block", headers.Get("X-XSS-Protection"))
-	assert.Equal(t, "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self' data:; img-src 'self' data:;", headers.Get("Content-Security-Policy"))
+	assert.Equal(t, "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://*.s3.amazonaws.com; connect-src 'self' wss: https:; worker-src 'self'; manifest-src 'self'", headers.Get("Content-Security-Policy"))
 	assert.Equal(t, "max-age=31536000; includeSubDomains", headers.Get("Strict-Transport-Security"))
 	assert.Equal(t, "no-referrer", headers.Get("Referrer-Policy"))
-	assert.Equal(t, "require-corp", headers.Get("Cross-Origin-Embedder-Policy"))
-	assert.Equal(t, "same-origin", headers.Get("Cross-Origin-Opener-Policy"))
-	assert.Equal(t, "same-origin", headers.Get("Cross-Origin-Resource-Policy"))
+	assert.Equal(t, "credentialless", headers.Get("Cross-Origin-Embedder-Policy"))
+	assert.Equal(t, "same-origin-allow-popups", headers.Get("Cross-Origin-Opener-Policy"))
+	assert.Equal(t, "cross-origin", headers.Get("Cross-Origin-Resource-Policy"))
 }
 
 func TestBasicAuth(t *testing.T) {

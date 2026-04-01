@@ -17,6 +17,7 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AlertProvider } from "@/components/ui/alert";
+import { InstallPrompt } from "@/components/InstallPrompt";
 import { wsManager } from "@/lib/websocket";
 import { useAuthStore } from "@/stores/authStore";
 import { useHomeStore } from "@/stores/homeStore";
@@ -62,6 +63,7 @@ function RootLayoutNav() {
         <Stack.Screen name="register" options={{ headerShown: false }} />
         <Stack.Screen name="verify" options={{ headerShown: false }} />
         <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
+        <Stack.Screen name="reset-password" options={{ headerShown: false }} />
         <Stack.Screen name="rooms/index" options={{ headerShown: false }} />
         <Stack.Screen name="rooms/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="polls" options={{ headerShown: false }} />
@@ -82,6 +84,7 @@ function AppContent() {
     <GestureHandlerRootView className={`flex-1 ${theme.isDark ? "bg-background-dark" : "bg-background"}`}>
       <AlertProvider>
         <RootLayoutNav />
+        <InstallPrompt />
       </AlertProvider>
     </GestureHandlerRootView>
   );

@@ -189,7 +189,7 @@ export default {
       deleteScheduleConfirm: "Questo fermerà la rotazione automatica delle attività.",
       failedToCreate: "Impossibile creare la programmazione.",
       failedToDelete: "Impossibile eliminare la programmazione.",
-      selectUsers: "Seleziona almeno 2 membri per la rotazione",
+      selectUsers: "Seleziona almeno un membro per la rotazione",
       scheduled: "Programmato",
       deleteAction: "Elimina pianificazione",
     },

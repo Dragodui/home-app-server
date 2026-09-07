@@ -187,7 +187,7 @@ export default {
       deleteScheduleConfirm: "To zatrzyma automatyczną rotację zadań.",
       failedToCreate: "Nie udało się utworzyć harmonogramu.",
       failedToDelete: "Nie udało się usunąć harmonogramu.",
-      selectUsers: "Wybierz co najmniej 2 członków do rotacji",
+      selectUsers: "Wybierz co najmniej jednego członka do rotacji",
       scheduled: "Zaplanowane",
       deleteAction: "Usuń harmonogram",
     },

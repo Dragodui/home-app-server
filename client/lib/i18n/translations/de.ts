@@ -189,7 +189,7 @@ export default {
       deleteScheduleConfirm: "Dies stoppt die automatische Aufgabenrotation.",
       failedToCreate: "Zeitplan konnte nicht erstellt werden.",
       failedToDelete: "Zeitplan konnte nicht gelöscht werden.",
-      selectUsers: "Wählen Sie mindestens 2 Mitglieder für die Rotation",
+      selectUsers: "Wählen Sie mindestens ein Mitglied für die Rotation",
       scheduled: "Geplant",
       deleteAction: "Zeitplan löschen",
     },

@@ -187,7 +187,7 @@ export default {
       deleteScheduleConfirm: "Це зупинить автоматичну ротацію завдань.",
       failedToCreate: "Не вдалося створити розклад.",
       failedToDelete: "Не вдалося видалити розклад.",
-      selectUsers: "Оберіть щонайменше 2 учасників для ротації",
+      selectUsers: "Оберіть щонайменше одного учасника для ротації",
       scheduled: "Заплановано",
       deleteAction: "Видалити розклад",
     },

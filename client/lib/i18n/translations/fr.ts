@@ -189,7 +189,7 @@ export default {
       deleteScheduleConfirm: "Cela arrêtera la rotation automatique des tâches.",
       failedToCreate: "Impossible de créer le planning.",
       failedToDelete: "Impossible de supprimer le planning.",
-      selectUsers: "Sélectionnez au moins 2 membres pour la rotation",
+      selectUsers: "Sélectionnez au moins un membre pour la rotation",
       scheduled: "Planifié",
       deleteAction: "Supprimer la planification",
     },

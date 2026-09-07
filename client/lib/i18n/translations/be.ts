@@ -187,7 +187,7 @@ export default {
       deleteScheduleConfirm: "Гэта спыніць аўтаматычную ратацыю задач.",
       failedToCreate: "Не ўдалося стварыць расклад.",
       failedToDelete: "Не ўдалося выдаліць расклад.",
-      selectUsers: "Абярыце хаця б 2 удзельнікаў для ратацыі",
+      selectUsers: "Абярыце хаця б аднаго ўдзельніка для ратацыі",
       scheduled: "Запланавана",
       deleteAction: "Выдаліць расклад",
     },

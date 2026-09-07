@@ -63,6 +63,8 @@ export default function TasksScreen() {
   const [editTaskRoomId, setEditTaskRoomId] = useState<number | null>(null);
   const [editTaskDate, setEditTaskDate] = useState<Date | null>(null);
   const [editReminderMinutesInput, setEditReminderMinutesInput] = useState("30");
+  const [editTaskUserIds, setEditTaskUserIds] = useState<number[]>([]);
+  const [editTaskOriginalAssignments, setEditTaskOriginalAssignments] = useState<TaskAssignment[]>([]);
   const [savingEditTask, setSavingEditTask] = useState(false);
   const [isEditDatePickerVisible, setIsEditDatePickerVisible] = useState(false);
 
@@ -227,6 +229,9 @@ export default function TasksScreen() {
     setEditTaskRoomId(task.roomId ?? null);
     setEditTaskDate(task.dueDate ? new Date(task.dueDate) : null);
     setEditReminderMinutesInput(String(task.reminderMinutes ?? 30));
+    const activeAssignments = (task.assignments || []).filter((a) => a.status !== "completed");
+    setEditTaskOriginalAssignments(activeAssignments);
+    setEditTaskUserIds(activeAssignments.map((a) => a.userId));
     setShowEditTaskModal(true);
   };
 
@@ -241,6 +246,17 @@ export default function TasksScreen() {
         dueDate: editTaskDate ? editTaskDate.toISOString() : undefined,
         reminderMinutes: parseReminderMinutes(editReminderMinutesInput),
       });
+
+      const originalUserIds = editTaskOriginalAssignments.map((a) => a.userId);
+      const userIdsToAssign = editTaskUserIds.filter((id) => !originalUserIds.includes(id));
+      const assignmentsToRemove = editTaskOriginalAssignments.filter((a) => !editTaskUserIds.includes(a.userId));
+      const assignDate = (editTaskDate ?? new Date()).toISOString();
+
+      await Promise.all([
+        ...userIdsToAssign.map((userId) => taskApi.assignUser(home.id, editingTaskId, userId, assignDate)),
+        ...assignmentsToRemove.map((a) => taskApi.deleteAssignment(home.id, editingTaskId, a.id)),
+      ]);
+
       setShowEditTaskModal(false);
       setEditingTaskId(null);
       await loadTasks();
@@ -253,7 +269,7 @@ export default function TasksScreen() {
   };
 
   const handleCreateSchedule = async () => {
-    if (!home || !scheduleTaskId || scheduleUserIds.length < 2) return;
+    if (!home || !scheduleTaskId || scheduleUserIds.length === 0) return;
 
     setCreatingSchedule(true);
     try {
@@ -948,6 +964,43 @@ export default function TasksScreen() {
             </ScrollView>
           )}
 
+          {home?.memberships && home.memberships.length > 0 && (
+            <View className="mb-6">
+              <Text
+                className="text-xs font-manrope-bold uppercase tracking-wide mb-3 ml-1"
+                style={{ color: theme.textSecondary }}
+              >
+                {t.tasks.assignTo}
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View className="flex-row gap-2.5">
+                  {home.memberships.map((membership) => {
+                    const isSelected = editTaskUserIds.includes(membership.userId);
+                    return (
+                      <TouchableOpacity
+                        key={membership.userId}
+                        className="px-4.5 py-3 rounded-[12px]"
+                        style={[{ backgroundColor: theme.surface }, isSelected && { backgroundColor: theme.text }]}
+                        onPress={() =>
+                          setEditTaskUserIds((prev) =>
+                            isSelected ? prev.filter((id) => id !== membership.userId) : [...prev, membership.userId],
+                          )
+                        }
+                      >
+                        <Text
+                          className="text-sm font-manrope-semibold"
+                          style={[{ color: theme.textSecondary }, isSelected && { color: theme.background }]}
+                        >
+                          {membership.user?.name || `User ${membership.userId}`}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </ScrollView>
+            </View>
+          )}
+
           <Button
             title={t.common.save}
             onPress={handleSaveTaskEdit}
@@ -1052,7 +1105,7 @@ export default function TasksScreen() {
                   );
                 })}
               </View>
-              {scheduleUserIds.length > 0 && scheduleUserIds.length < 2 && (
+              {scheduleUserIds.length === 0 && (
                 <Text className="text-xs font-manrope mt-2 ml-1" style={{ color: theme.status.error }}>
                   {t.tasks.schedule.selectUsers}
                 </Text>
@@ -1064,7 +1117,7 @@ export default function TasksScreen() {
             title={t.tasks.schedule.create}
             onPress={handleCreateSchedule}
             loading={creatingSchedule}
-            disabled={scheduleUserIds.length < 2 || creatingSchedule}
+            disabled={scheduleUserIds.length === 0 || creatingSchedule}
             variant="purple"
             style={{ marginTop: "auto" }}
           />

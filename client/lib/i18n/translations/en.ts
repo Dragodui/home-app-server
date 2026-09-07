@@ -190,7 +190,7 @@ export default {
       deleteAction: "Delete schedule",
       failedToCreate: "Failed to create schedule.",
       failedToDelete: "Failed to delete schedule.",
-      selectUsers: "Select at least 2 members for rotation",
+      selectUsers: "Select at least one member for rotation",
       scheduled: "Scheduled",
     },
   },

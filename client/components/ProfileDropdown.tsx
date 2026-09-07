@@ -30,7 +30,7 @@ export default function ProfileDropdown() {
     }
     try {
       const [userNotifs, homeNotifs] = await Promise.all([
-        notificationApi.getUserNotifications().catch(() => []),
+        notificationApi.getUserNotifications(home.id).catch(() => []),
         notificationApi.getHomeNotifications(home.id).catch(() => []),
       ]);
 

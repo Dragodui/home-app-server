@@ -23,10 +23,10 @@ func TestMain(m *testing.M) {
 // Mock NotificationService (no-op, shared across all test files in this package)
 type mockNotifSvc struct{}
 
-func (m *mockNotifSvc) Create(ctx context.Context, from *int, to int, description string) error {
+func (m *mockNotifSvc) Create(ctx context.Context, from *int, to int, homeID *int, description string) error {
 	return nil
 }
-func (m *mockNotifSvc) GetByUserID(ctx context.Context, userID int) ([]models.Notification, error) {
+func (m *mockNotifSvc) GetByUserID(ctx context.Context, userID int, homeID *int) ([]models.Notification, error) {
 	return nil, nil
 }
 func (m *mockNotifSvc) MarkAsRead(ctx context.Context, notificationID, userID int) error {

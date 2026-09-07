@@ -9,8 +9,11 @@ import (
 
 type NotificationRepository interface {
 	Create(ctx context.Context, n *models.Notification) error
-	FindByUserID(ctx context.Context, id int) ([]models.Notification, error)
-	MarkAsRead(ctx context.Context, id int) error
+	// FindByUserID returns the user's notifications, optionally scoped to a single home
+	// (pass nil to get notifications across every home the user belongs to).
+	FindByUserID(ctx context.Context, id int, homeID *int) ([]models.Notification, error)
+	// MarkAsRead marks the notification read and returns it (so the caller can see which home it belongs to).
+	MarkAsRead(ctx context.Context, id int) (*models.Notification, error)
 
 	CreateHomeNotification(ctx context.Context, n *models.HomeNotification) error
 	FindByHomeID(ctx context.Context, id int) ([]models.HomeNotification, error)
@@ -30,9 +33,13 @@ func (r *notificationRepo) Create(ctx context.Context, n *models.Notification) e
 	return r.db.WithContext(ctx).Create(n).Error
 }
 
-func (r *notificationRepo) FindByUserID(ctx context.Context, id int) ([]models.Notification, error) {
+func (r *notificationRepo) FindByUserID(ctx context.Context, id int, homeID *int) ([]models.Notification, error) {
 	var notifications []models.Notification
-	if err := r.db.WithContext(ctx).Where("\"to\" = ?", id).Find(&notifications).Error; err != nil {
+	query := r.db.WithContext(ctx).Where("\"to\" = ?", id)
+	if homeID != nil {
+		query = query.Where("home_id = ?", *homeID)
+	}
+	if err := query.Find(&notifications).Error; err != nil {
 		return nil, err
 	}
 
@@ -40,19 +47,19 @@ func (r *notificationRepo) FindByUserID(ctx context.Context, id int) ([]models.N
 
 }
 
-func (r *notificationRepo) MarkAsRead(ctx context.Context, id int) error {
+func (r *notificationRepo) MarkAsRead(ctx context.Context, id int) (*models.Notification, error) {
 	var notification models.Notification
 
 	if err := r.db.WithContext(ctx).First(&notification, id).Error; err != nil {
-		return err
+		return nil, err
 	}
 
 	notification.Read = true
 	if err := r.db.WithContext(ctx).Save(&notification).Error; err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &notification, nil
 }
 
 // home notifications

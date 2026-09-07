@@ -101,8 +101,8 @@ export default function NotificationsScreen() {
     try {
       let allNotifications: (Notification | HomeNotification)[] = [];
 
-      // Load user notifications
-      const userNotifications = await notificationApi.getUserNotifications().catch(() => []);
+      // Load user notifications, scoped to the currently selected home
+      const userNotifications = await notificationApi.getUserNotifications(home?.id).catch(() => []);
       allNotifications = [...userNotifications];
 
       // Load home notifications if user is in a home

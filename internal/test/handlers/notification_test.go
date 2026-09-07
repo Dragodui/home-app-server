@@ -16,24 +16,24 @@ import (
 
 // Mock notification service
 type mockNotificationService struct {
-	CreateFunc                        func(ctx context.Context, from *int, to int, description string) error
-	GetByUserIDFunc                   func(ctx context.Context, userID int) ([]models.Notification, error)
+	CreateFunc                        func(ctx context.Context, from *int, to int, homeID *int, description string) error
+	GetByUserIDFunc                   func(ctx context.Context, userID int, homeID *int) ([]models.Notification, error)
 	MarkAsReadFunc                    func(ctx context.Context, notificationID, userID int) error
 	CreateHomeNotificationFunc        func(ctx context.Context, from *int, homeID int, description string) error
 	GetByHomeIDFunc                   func(ctx context.Context, homeID int) ([]models.HomeNotification, error)
 	MarkAsReadForHomeNotificationFunc func(ctx context.Context, notificationID, homeID int) error
 }
 
-func (m *mockNotificationService) Create(ctx context.Context, from *int, to int, description string) error {
+func (m *mockNotificationService) Create(ctx context.Context, from *int, to int, homeID *int, description string) error {
 	if m.CreateFunc != nil {
-		return m.CreateFunc(ctx, from, to, description)
+		return m.CreateFunc(ctx, from, to, homeID, description)
 	}
 	return nil
 }
 
-func (m *mockNotificationService) GetByUserID(ctx context.Context, userID int) ([]models.Notification, error) {
+func (m *mockNotificationService) GetByUserID(ctx context.Context, userID int, homeID *int) ([]models.Notification, error) {
 	if m.GetByUserIDFunc != nil {
-		return m.GetByUserIDFunc(ctx, userID)
+		return m.GetByUserIDFunc(ctx, userID, homeID)
 	}
 	return nil, nil
 }
@@ -83,14 +83,14 @@ func TestNotificationHandler_GetByUserID(t *testing.T) {
 	tests := []struct {
 		name           string
 		userID         int
-		mockFunc       func(ctx context.Context, userID int) ([]models.Notification, error)
+		mockFunc       func(ctx context.Context, userID int, homeID *int) ([]models.Notification, error)
 		expectedStatus int
 		expectedBody   string
 	}{
 		{
 			name:   "Success",
 			userID: 123,
-			mockFunc: func(ctx context.Context, userID int) ([]models.Notification, error) {
+			mockFunc: func(ctx context.Context, userID int, homeID *int) ([]models.Notification, error) {
 				require.Equal(t, 123, userID)
 				return []models.Notification{
 					{ID: 1, To: 123, Description: "Test notification"},
@@ -102,7 +102,7 @@ func TestNotificationHandler_GetByUserID(t *testing.T) {
 		{
 			name:   "Empty List",
 			userID: 123,
-			mockFunc: func(ctx context.Context, userID int) ([]models.Notification, error) {
+			mockFunc: func(ctx context.Context, userID int, homeID *int) ([]models.Notification, error) {
 				return []models.Notification{}, nil
 			},
 			expectedStatus: http.StatusOK,
@@ -111,7 +111,7 @@ func TestNotificationHandler_GetByUserID(t *testing.T) {
 		{
 			name:   "Service Error",
 			userID: 123,
-			mockFunc: func(ctx context.Context, userID int) ([]models.Notification, error) {
+			mockFunc: func(ctx context.Context, userID int, homeID *int) ([]models.Notification, error) {
 				return nil, errors.New("database error")
 			},
 			expectedStatus: http.StatusInternalServerError,

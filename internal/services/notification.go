@@ -21,8 +21,10 @@ type NotificationService struct {
 
 type INotificationService interface {
 	// user notifications
-	Create(ctx context.Context, from *int, to int, description string) error
-	GetByUserID(ctx context.Context, userID int) ([]models.Notification, error)
+	Create(ctx context.Context, from *int, to int, homeID *int, description string) error
+	// GetByUserID returns the user's notifications, optionally scoped to a single home
+	// (pass nil to get notifications across every home the user belongs to).
+	GetByUserID(ctx context.Context, userID int, homeID *int) ([]models.Notification, error)
 	MarkAsRead(ctx context.Context, notificationID, userID int) error
 
 	// home notifications
@@ -35,16 +37,21 @@ func NewNotificationService(repo repository.NotificationRepository, cache *redis
 	return &NotificationService{repo: repo, cache: cache, pushSvc: pushSvc, homeRepo: homeRepo}
 }
 
-func (s *NotificationService) Create(ctx context.Context, from *int, to int, description string) error {
-	// remove from cache
-	key := utils.GetUserNotificationsKey(to)
-	if err := utils.DeleteFromCache(ctx, key, s.cache); err != nil {
-		logger.Info.Printf("Failed to delete redis cache for key %s: %v", key, err)
+func (s *NotificationService) Create(ctx context.Context, from *int, to int, homeID *int, description string) error {
+	// remove from cache: the scoped view for this home, and the unscoped "all homes" view
+	if err := utils.DeleteFromCache(ctx, utils.GetUserNotificationsKey(to, homeID), s.cache); err != nil {
+		logger.Info.Printf("Failed to delete redis cache for user %d notifications: %v", to, err)
+	}
+	if homeID != nil {
+		if err := utils.DeleteFromCache(ctx, utils.GetUserNotificationsKey(to, nil), s.cache); err != nil {
+			logger.Info.Printf("Failed to delete redis cache for user %d notifications: %v", to, err)
+		}
 	}
 
 	notification := &models.Notification{
 		From:        from,
 		To:          to,
+		HomeID:      homeID,
 		Description: description,
 	}
 	if err := s.repo.Create(ctx, notification); err != nil {
@@ -65,14 +72,14 @@ func (s *NotificationService) Create(ctx context.Context, from *int, to int, des
 	return nil
 }
 
-func (s *NotificationService) GetByUserID(ctx context.Context, userID int) ([]models.Notification, error) {
-	key := utils.GetUserNotificationsKey(userID)
+func (s *NotificationService) GetByUserID(ctx context.Context, userID int, homeID *int) ([]models.Notification, error) {
+	key := utils.GetUserNotificationsKey(userID, homeID)
 	cached, err := utils.GetFromCache[[]models.Notification](ctx, key, s.cache)
 	if cached != nil && err == nil {
 		return *cached, err
 	}
 
-	notifications, err := s.repo.FindByUserID(ctx, userID)
+	notifications, err := s.repo.FindByUserID(ctx, userID, homeID)
 	if err != nil {
 		return nil, err
 	}
@@ -85,13 +92,20 @@ func (s *NotificationService) GetByUserID(ctx context.Context, userID int) ([]mo
 }
 
 func (s *NotificationService) MarkAsRead(ctx context.Context, notificationID, userID int) error {
-	key := utils.GetUserNotificationsKey(userID)
-	if err := utils.DeleteFromCache(ctx, key, s.cache); err != nil {
-		logger.Info.Printf("Failed to delete redis cache for key %s: %v", key, err)
+	notification, err := s.repo.MarkAsRead(ctx, notificationID)
+	if err != nil {
+		return err
 	}
 
-	if err := s.repo.MarkAsRead(ctx, notificationID); err != nil {
-		return err
+	// invalidate the unscoped "all homes" view and, if this notification belongs to a
+	// home, that home's scoped view too
+	if err := utils.DeleteFromCache(ctx, utils.GetUserNotificationsKey(userID, nil), s.cache); err != nil {
+		logger.Info.Printf("Failed to delete redis cache for user %d notifications: %v", userID, err)
+	}
+	if notification.HomeID != nil {
+		if err := utils.DeleteFromCache(ctx, utils.GetUserNotificationsKey(userID, notification.HomeID), s.cache); err != nil {
+			logger.Info.Printf("Failed to delete redis cache for user %d notifications: %v", userID, err)
+		}
 	}
 
 	event.SendEvent(ctx, s.cache, fmt.Sprintf("user:%d:updates", userID), &event.RealTimeEvent{

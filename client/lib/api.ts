@@ -784,8 +784,11 @@ export const pollApi = {
 
 // ============ Notification API ============
 export const notificationApi = {
-  getUserNotifications: async (): Promise<Notification[]> => {
-    const response = await api.get<{ status: boolean; notifications: Notification[] }>("/homes/notifications");
+  // Scope to a single home via homeId, so switching homes doesn't show notifications from others.
+  getUserNotifications: async (homeId?: number): Promise<Notification[]> => {
+    const response = await api.get<{ status: boolean; notifications: Notification[] }>("/homes/notifications", {
+      params: homeId ? { home_id: homeId } : undefined,
+    });
     return response.data.notifications || [];
   },
 

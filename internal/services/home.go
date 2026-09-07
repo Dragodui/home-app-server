@@ -139,7 +139,7 @@ func (s *HomeService) JoinHomeByCode(ctx context.Context, code string, userID in
 	// Notify home that a user has requested to join
 	fromID := userID
 	_ = s.notifSvc.CreateHomeNotification(ctx, &fromID, home.ID, "A user has requested to join the home")
-	_ = s.notifSvc.Create(ctx, nil, userID, "Join request sent. Waiting for admin approval.")
+	_ = s.notifSvc.Create(ctx, nil, userID, &home.ID, "Join request sent. Waiting for admin approval.")
 
 	event.SendHomeEvent(ctx, s.cache, home.ID, &event.RealTimeEvent{
 		Module: event.ModuleHome,
@@ -251,7 +251,7 @@ func (s *HomeService) RemoveMember(ctx context.Context, homeID int, userID int, 
 
 	// Notify the removed user
 	fromID := currentUserID
-	_ = s.notifSvc.Create(ctx, &fromID, userID, "You have been removed from a home")
+	_ = s.notifSvc.Create(ctx, &fromID, userID, &homeID, "You have been removed from a home")
 	// Notify home that a member was removed
 	_ = s.notifSvc.CreateHomeNotification(ctx, &fromID, homeID, "A member has been removed from the home")
 
@@ -329,7 +329,7 @@ func (s *HomeService) ApproveMember(ctx context.Context, homeID int, userID int)
 
 	metrics.HomeOperationsTotal.WithLabelValues("approve_member").Inc()
 
-	_ = s.notifSvc.Create(ctx, nil, userID, "Your request to join the home has been approved")
+	_ = s.notifSvc.Create(ctx, nil, userID, &homeID, "Your request to join the home has been approved")
 	_ = s.notifSvc.CreateHomeNotification(ctx, nil, homeID, "A new member has been approved")
 
 	event.SendHomeEvent(ctx, s.cache, homeID, &event.RealTimeEvent{
@@ -353,7 +353,7 @@ func (s *HomeService) RejectMember(ctx context.Context, homeID int, userID int) 
 
 	metrics.HomeOperationsTotal.WithLabelValues("reject_member").Inc()
 
-	_ = s.notifSvc.Create(ctx, nil, userID, "Your request to join the home has been rejected")
+	_ = s.notifSvc.Create(ctx, nil, userID, &homeID, "Your request to join the home has been rejected")
 
 	return nil
 }
@@ -384,7 +384,7 @@ func (s *HomeService) UpdateMemberRole(ctx context.Context, homeID int, userID i
 
 	metrics.HomeOperationsTotal.WithLabelValues("update_role").Inc()
 
-	_ = s.notifSvc.Create(ctx, nil, userID, "Your role has been updated to "+role)
+	_ = s.notifSvc.Create(ctx, nil, userID, &homeID, "Your role has been updated to "+role)
 
 	event.SendHomeEvent(ctx, s.cache, homeID, &event.RealTimeEvent{
 		Module: event.ModuleHome,

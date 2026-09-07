@@ -20,18 +20,30 @@ func NewNotificationHandler(svc services.INotificationService) *NotificationHand
 
 // GetByUserID godoc
 // @Summary      Get notifications by user ID
-// @Description  Get all notifications for the current user
+// @Description  Get notifications for the current user, optionally scoped to one home via ?home_id=
 // @Tags         notification
 // @Produce      json
 // @Security     BearerAuth
+// @Param        home_id query int false "Home ID to scope notifications to"
 // @Success      200  {object}  map[string]interface{}
+// @Failure      400  {object}  map[string]interface{}
 // @Failure      401  {object}  map[string]interface{}
 // @Failure      500  {object}  map[string]interface{}
 // @Router       /homes/notifications [get]
 func (h *NotificationHandler) GetByUserID(w http.ResponseWriter, r *http.Request) {
 	userID := middleware.GetUserID(r)
 
-	notifications, err := h.svc.GetByUserID(r.Context(), userID)
+	var homeID *int
+	if homeIDStr := r.URL.Query().Get("home_id"); homeIDStr != "" {
+		parsed, err := strconv.Atoi(homeIDStr)
+		if err != nil {
+			utils.JSONError(w, "invalid home_id", http.StatusBadRequest)
+			return
+		}
+		homeID = &parsed
+	}
+
+	notifications, err := h.svc.GetByUserID(r.Context(), userID, homeID)
 	if err != nil {
 		utils.SafeError(w, err, "Failed to retrieve notifications", http.StatusInternalServerError)
 		return

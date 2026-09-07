@@ -109,7 +109,7 @@ func (s *TaskService) CreateTask(ctx context.Context, homeID int, roomID *int, n
 		// Notify assigned user (skip if they created the task themselves)
 		if uid != createdBy {
 			fromID := createdBy
-			_ = s.notifSvc.Create(ctx, &fromID, uid, "You have been assigned a new task: "+name)
+			_ = s.notifSvc.Create(ctx, &fromID, uid, &homeID, "You have been assigned a new task: "+name)
 		}
 	}
 
@@ -294,7 +294,8 @@ func (s *TaskService) ProcessTaskReminders(ctx context.Context) error {
 			description = fmt.Sprintf("Task \"%s\" is due now.", assignment.Task.Name)
 		}
 
-		if err := s.notifSvc.Create(ctx, nil, assignment.UserID, description); err != nil {
+		taskHomeID := assignment.Task.HomeID
+		if err := s.notifSvc.Create(ctx, nil, assignment.UserID, &taskHomeID, description); err != nil {
 			logger.Info.Printf("Failed to create reminder notification for assignment %d: %v", assignment.ID, err)
 			continue
 		}
@@ -334,7 +335,7 @@ func (s *TaskService) AssignUser(ctx context.Context, taskID, userID, homeID int
 
 	// Notify assigned user
 	taskName := task.Name
-	_ = s.notifSvc.Create(ctx, nil, userID, "You have been assigned to task: "+taskName)
+	_ = s.notifSvc.Create(ctx, nil, userID, &homeID, "You have been assigned to task: "+taskName)
 
 	metrics.TaskOperationsTotal.WithLabelValues("assign").Inc()
 

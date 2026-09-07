@@ -58,7 +58,7 @@ export default function HomeScreen() {
           taskApi.getByHomeId(home.id).catch(() => []),
           pollApi.getByHomeId(home.id).catch(() => []),
           billApi.getByHomeId(home.id).catch(() => []),
-          notificationApi.getUserNotifications().catch(() => []),
+          notificationApi.getUserNotifications(home.id).catch(() => []),
           notificationApi.getHomeNotifications(home.id).catch(() => []),
         ]);
 

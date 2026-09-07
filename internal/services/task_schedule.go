@@ -85,7 +85,7 @@ func (s *TaskScheduleService) CreateSchedule(ctx context.Context, taskID, homeID
 	}
 
 	// Notify the first user
-	_ = s.notifSvc.Create(ctx, nil, firstUserID, "You have been assigned to scheduled task: "+task.Name)
+	_ = s.notifSvc.Create(ctx, nil, firstUserID, &homeID, "You have been assigned to scheduled task: "+task.Name)
 
 	// Invalidate caches
 	s.invalidateTaskCaches(ctx, taskID, homeID)
@@ -164,10 +164,12 @@ func (s *TaskScheduleService) ProcessDueSchedules(ctx context.Context) error {
 
 		// Notify the user about their rotation assignment
 		taskName := ""
+		var scheduleHomeID *int
 		if schedule.Task != nil {
 			taskName = schedule.Task.Name
+			scheduleHomeID = &schedule.Task.HomeID
 		}
-		_ = s.notifSvc.Create(ctx, nil, nextUserID, "It's your turn! You've been assigned to task: "+taskName)
+		_ = s.notifSvc.Create(ctx, nil, nextUserID, scheduleHomeID, "It's your turn! You've been assigned to task: "+taskName)
 
 		// Update rotation index and next run date
 		schedule.CurrentRotationIndex = (schedule.CurrentRotationIndex + 1) % len(userIDs)

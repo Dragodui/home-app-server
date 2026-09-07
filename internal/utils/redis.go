@@ -127,8 +127,13 @@ func GetAllPollsForHomeKey(homeID int) string {
 	return "poll:home:" + strconv.Itoa(homeID)
 }
 
-func GetUserNotificationsKey(userID int) string {
-	return "notification:user:" + strconv.Itoa(userID)
+// GetUserNotificationsKey builds the cache key for a user's notifications,
+// optionally scoped to a single home (pass nil for the unscoped, all-homes view).
+func GetUserNotificationsKey(userID int, homeID *int) string {
+	if homeID == nil {
+		return "notification:user:" + strconv.Itoa(userID) + ":home:all"
+	}
+	return "notification:user:" + strconv.Itoa(userID) + ":home:" + strconv.Itoa(*homeID)
 }
 
 func GetHomeNotificationsKey(homeID int) string {

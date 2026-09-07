@@ -6,6 +6,7 @@ type Notification struct {
 	ID          int       `gorm:"autoIncrement;primaryKey" json:"id"`
 	From        *int      `json:"from"` // userID
 	To          int       `json:"to"`   // userID
+	HomeID      *int      `json:"home_id"`
 	Description string    `json:"description"`
 	Read        bool      `gorm:"default:false" json:"read"`
 	CreatedAt   time.Time `gorm:"autoCreateTime" json:"created_at"`
@@ -13,6 +14,7 @@ type Notification struct {
 	// relations
 	UserFrom *User `gorm:"foreignKey:From;constraint:OnDelete:CASCADE" json:"user_from,omitempty"`
 	UserTo   User  `gorm:"foreignKey:To;constraint:OnDelete:CASCADE" json:"user_to,omitempty"`
+	Home     *Home `gorm:"foreignKey:HomeID;constraint:OnDelete:CASCADE" json:"home,omitempty"`
 }
 
 type HomeNotification struct {

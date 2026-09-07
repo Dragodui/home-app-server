@@ -278,10 +278,10 @@ export default function HomeScreen() {
                   </View>
                   <View>
                     <Text className="text-lg font-manrope-bold" style={{ color: theme.text }}>
-                      Smart Home
+                      {t.smartHome.title}
                     </Text>
                     <Text className="text-sm font-manrope" style={{ color: theme.textSecondary }}>
-                      Manage devices
+                      {t.smartHome.manageDevices}
                     </Text>
                   </View>
                 </View>

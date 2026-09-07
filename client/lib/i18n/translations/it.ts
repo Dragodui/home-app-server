@@ -33,6 +33,11 @@ export default {
       "dicembre",
     ],
     weekdaysShort: ["Lu", "Ma", "Me", "Gi", "Ve", "Sa", "Do"],
+    edit: "Modifica",
+    open: "Apri",
+    read: "Letto",
+    deleted: "Eliminato",
+    pending: "In attesa",
   },
 
   // Auth
@@ -41,7 +46,7 @@ export default {
     tagline: "La convivenza reinventata.",
     joinTagline: "La vita intelligente inizia qui.",
     email: "E-MAIL",
-    emailPlaceholder: "hello@gome.app",
+    emailPlaceholder: "hello@home.app",
     password: "PASSWORD",
     passwordPlaceholder: "Inserisci la tua password",
     createPassword: "Crea una password",
@@ -71,6 +76,25 @@ export default {
     failedToGetUserInfo: "Impossibile ottenere le informazioni utente da Google",
     forgotPassword: "Password dimenticata?",
     leaveHome: "Lascia casa",
+    emailRequired: "Inserisci la tua email",
+    failedToSendResetEmail: "Impossibile inviare l'email di reimpostazione",
+    checkYourEmail: "Controlla la tua email",
+    resetLinkSentTo: "Abbiamo inviato un link per reimpostare la password a",
+    backToLogin: "Torna al login",
+    forgotPasswordDescription:
+      "Nessun problema! Inserisci la tua email e ti invieremo un link per reimpostare la password.",
+    emailAddressLabel: "Indirizzo email",
+    sendResetLink: "Invia link di reimpostazione",
+    rememberYourPassword: "Ricordi la tua password?",
+    invalidResetToken: "Token di reimpostazione non valido o mancante",
+    passwordMinLength8: "La password deve contenere almeno 8 caratteri",
+    failedToResetPassword: "Impossibile reimpostare la password",
+    passwordResetTitle: "Password reimpostata!",
+    passwordResetSuccessText:
+      "La tua password è stata reimpostata con successo.\nOra puoi accedere con la tua nuova password.",
+    goToLogin: "Vai al login",
+    resetPasswordTitle: "Reimposta password",
+    resetPasswordDescription: "Inserisci la tua nuova password qui sotto.",
   },
 
   // Verification
@@ -167,7 +191,11 @@ export default {
       failedToDelete: "Impossibile eliminare la programmazione.",
       selectUsers: "Seleziona almeno 2 membri per la rotazione",
       scheduled: "Programmato",
+      deleteAction: "Elimina pianificazione",
     },
+    failedToUpdate: "Impossibile aggiornare l'attività.",
+    editTask: "Modifica attività",
+    noRoom: "Nessuna stanza",
   },
 
   // Shopping
@@ -206,6 +234,11 @@ export default {
       books: "Libri",
       gifts: "Regali",
     },
+    editItem: "Modifica articolo",
+    noItems: "Nessun articolo",
+    noItemsHint: "La tua lista della spesa è vuota.",
+    noLists: "Nessuna lista della spesa",
+    noListsHint: "Crea la tua prima categoria di lista della spesa per iniziare ad aggiungere articoli.",
   },
 
   // Budget / Expenses
@@ -265,6 +298,19 @@ export default {
     allTime: "Sempre",
     currentMonth: "Mese corrente",
     viewReceipt: "Vedi scontrino",
+    failedToUpdateCategory: "Impossibile aggiornare la categoria",
+    failedToUpdateBill: "Impossibile aggiornare la spesa",
+    private: "Privato",
+    pdf: "PDF",
+    regularExpense: "Spesa ricorrente",
+    regularExpenseHint: "Aggiungi questa spesa automaticamente",
+    repeat: "Ripeti",
+    receiptFile: "File dello scontrino",
+    editCategory: "Modifica categoria",
+    editExpense: "Modifica spesa",
+    noExpensesHint: "Nessuna spesa registrata per questo periodo.",
+    newBill: "Aggiungi spesa",
+    expenses: "Spese",
   },
 
   // Polls
@@ -299,6 +345,7 @@ export default {
     deletePoll: "Elimina sondaggio",
     deletePollConfirm: "Sei sicuro di voler eliminare questo sondaggio?",
     failedToDelete: "Impossibile eliminare il sondaggio",
+    noActivePollsDescription: "Non ci sono ancora sondaggi attivi in questa casa.",
   },
 
   // Settings
@@ -322,6 +369,7 @@ export default {
 
   // Members
   members: {
+    you: "(tu)",
     title: "Membri",
     admin: "Admin",
     member: "Membro",
@@ -366,6 +414,7 @@ export default {
     pushBlocked: "Notifiche push bloccate",
     pushBlockedText: "Attivale nelle impostazioni del browser",
     pushError: "Impossibile attivare le notifiche push",
+    hiddenForYou: "Notifica nascosta per te.",
   },
 
   // Security
@@ -389,9 +438,56 @@ export default {
     passwordTooShort: "La password deve avere almeno 6 caratteri",
     passwordChanged: "Password cambiata con successo",
     passwordChangeFailed: "Cambio password fallito",
+    currentPasswordPlaceholder: "Inserisci la password attuale",
+    newPasswordPlaceholder: "Inserisci la nuova password",
+    confirmPasswordPlaceholder: "Conferma la nuova password",
   },
 
   // Profile
+  // Smart Home
+  smartHome: {
+    title: "Casa intelligente",
+    manageDevices: "Gestisci dispositivi",
+    connection: "Connessione casa intelligente",
+    dashboard: "Dashboard casa intelligente",
+    statusConnected: "Stato: connesso",
+    urlPrefix: "URL:",
+    errorPrefix: "Errore:",
+    connectDescription: "Collega la tua istanza di Home Assistant per controllare i dispositivi.",
+    urlFieldLabel: "URL Home Assistant",
+    tokenFieldLabel: "Token di accesso a lunga durata",
+    connect: "Connetti",
+    disconnect: "Disconnetti",
+    connectedSuccess: "Home Assistant connesso con successo",
+    disconnectedSuccess: "Disconnesso da Home Assistant",
+    failedToConnect: "Impossibile connettersi a Home Assistant",
+    failedToDisconnect: "Impossibile disconnettersi",
+    allDevices: "Tutti i dispositivi",
+    noDevicesYet: "Nessun dispositivo ancora aggiunto",
+    connectHomeAssistant: "Connetti Home Assistant",
+    addDevice: "Aggiungi dispositivo",
+    editDevice: "Modifica dispositivo",
+    backToList: "Torna alla lista",
+    deviceNameLabel: "Nome dispositivo",
+    deviceNamePlaceholder: "es. Luce del soggiorno",
+    roomDeviceNamePlaceholder: "es. Luce a soffitto",
+    assignRoomOptional: "Assegna stanza (opzionale)",
+    roomLabel: "Stanza",
+    selectDeviceToAdd: "Seleziona un dispositivo da aggiungere",
+    noNewDevicesFound: "Nessun nuovo dispositivo trovato",
+    connectedStatus: "Connesso",
+    disconnectedStatus: "Disconnesso",
+    unknownState: "Sconosciuto",
+    noRoomAssigned: "Nessuna stanza",
+    noDevicesInRoom: "Nessun dispositivo in questa stanza",
+    deleteDeviceTitle: "Elimina dispositivo",
+    deleteDeviceConfirm: "Vuoi davvero rimuovere {name}?",
+    failedToUpdateDevice: "Impossibile aggiornare il dispositivo",
+    failedToDeleteDevice: "Impossibile eliminare il dispositivo",
+    failedToAddDevice: "Impossibile aggiungere il dispositivo",
+    failedToDiscoverDevices: "Impossibile rilevare i dispositivi",
+  },
+
   profile: {
     homeAdmin: "Amministratore casa",
     member: "Membro",
@@ -436,6 +532,9 @@ export default {
     memberProfileAssignedSplitAmount: "Importo di ripartizione assegnato",
     memberProfileLoadFailed: "Impossibile caricare il profilo del membro",
     memberProfileVisibilityFailed: "Impossibile aggiornare la visibilità",
+    joinRequestSentTitle: "Richiesta casa",
+    joinRequestSentMessage: "Richiesta inviata. In attesa dell'approvazione dell'amministratore.",
+    failedToUpdateUsername: "Impossibile aggiornare il nome utente",
   },
 
   // Rooms
@@ -454,6 +553,9 @@ export default {
     added: "Aggiunto il {date}",
     failedToCreate: "Impossibile creare la stanza",
     failedToDelete: "Impossibile eliminare la stanza",
+    failedToUpdate: "Impossibile aggiornare la stanza",
+    editRoom: "Modifica stanza",
+    roomTasks: "Attività della stanza",
   },
 
   // Not Found
@@ -472,6 +574,16 @@ export default {
     polls: "Sondaggi",
     profile: "Profilo",
     notes: "Note",
+  },
+
+  install: {
+    iosPrompt: "Installa questa app sul tuo iPhone",
+    iosInstructionsPrefix: "Tocca",
+    iosShareButton: "Condividi",
+    iosInstructionsMiddle: "poi",
+    iosAddToHomeScreen: '"Aggiungi a Home"',
+    prompt: "Installa l'app per un'esperienza migliore",
+    install: "Installa",
   },
 
   notes: {
@@ -493,5 +605,13 @@ export default {
     mentions: "Mentions",
     mentionedInNote: "Mentioned in this note",
     selectCategory: "Select Category",
+    mentionedBlocks: "Blocchi menzionati (tocca per rimuovere)",
+    linkCategory: "Collega categoria",
+    browse: "Sfoglia →",
+    icon: "ICONA",
+    color: "COLORE",
+    failedToCreateCategory: "Impossibile creare la categoria",
+    failedToSave: "Impossibile salvare la nota",
+    failedToDelete: "Impossibile eliminare la nota",
   },
 };

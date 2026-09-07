@@ -33,6 +33,11 @@ export default {
       "грудень",
     ],
     weekdaysShort: ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"],
+    edit: "Редагувати",
+    open: "Відкрити",
+    read: "Прочитано",
+    deleted: "Видалено",
+    pending: "Очікує",
   },
 
   // Auth
@@ -41,7 +46,7 @@ export default {
     tagline: "Спільне життя по-новому.",
     joinTagline: "Розумне життя починається тут.",
     email: "ЕЛЕКТРОННА ПОШТА",
-    emailPlaceholder: "hello@gome.app",
+    emailPlaceholder: "hello@home.app",
     password: "ПАРОЛЬ",
     passwordPlaceholder: "Введіть свій пароль",
     createPassword: "Створіть пароль",
@@ -71,6 +76,23 @@ export default {
     failedToGetUserInfo: "Не вдалося отримати інформацію про користувача з Google",
     forgotPassword: "Забули пароль?",
     leaveHome: "Покинути дім",
+    emailRequired: "Будь ласка, введіть вашу електронну пошту",
+    failedToSendResetEmail: "Не вдалося надіслати лист для скидання пароля",
+    checkYourEmail: "Перевірте свою пошту",
+    resetLinkSentTo: "Ми надіслали посилання для скидання пароля на",
+    backToLogin: "Назад до входу",
+    forgotPasswordDescription: "Не хвилюйтеся! Введіть свою пошту, і ми надішлемо посилання для скидання пароля.",
+    emailAddressLabel: "Адреса електронної пошти",
+    sendResetLink: "Надіслати посилання",
+    rememberYourPassword: "Згадали пароль?",
+    invalidResetToken: "Недійсний або відсутній токен скидання",
+    passwordMinLength8: "Пароль має містити щонайменше 8 символів",
+    failedToResetPassword: "Не вдалося скинути пароль",
+    passwordResetTitle: "Пароль скинуто!",
+    passwordResetSuccessText: "Ваш пароль успішно скинуто.\nТепер ви можете увійти з новим паролем.",
+    goToLogin: "До входу",
+    resetPasswordTitle: "Скидання пароля",
+    resetPasswordDescription: "Введіть свій новий пароль нижче.",
   },
 
   // Verification
@@ -167,7 +189,11 @@ export default {
       failedToDelete: "Не вдалося видалити розклад.",
       selectUsers: "Оберіть щонайменше 2 учасників для ротації",
       scheduled: "Заплановано",
+      deleteAction: "Видалити розклад",
     },
+    failedToUpdate: "Не вдалося оновити завдання.",
+    editTask: "Редагувати завдання",
+    noRoom: "Без кімнати",
   },
 
   // Shopping
@@ -206,6 +232,11 @@ export default {
       books: "Книги",
       gifts: "Подарунки",
     },
+    editItem: "Редагувати товар",
+    noItems: "Немає товарів",
+    noItemsHint: "Ваш список покупок порожній.",
+    noLists: "Немає списків покупок",
+    noListsHint: "Створіть свою першу категорію списку покупок, щоб почати додавати товари.",
   },
 
   // Budget / Expenses
@@ -265,6 +296,19 @@ export default {
     allTime: "За весь час",
     currentMonth: "Поточний місяць",
     viewReceipt: "Переглянути чек",
+    failedToUpdateCategory: "Не вдалося оновити категорію",
+    failedToUpdateBill: "Не вдалося оновити рахунок",
+    private: "Приватний",
+    pdf: "PDF",
+    regularExpense: "Регулярна витрата",
+    regularExpenseHint: "Додавати цей рахунок автоматично",
+    repeat: "Повтор",
+    receiptFile: "Файл чека",
+    editCategory: "Редагувати категорію",
+    editExpense: "Редагувати витрату",
+    noExpensesHint: "За цей період витрат не зафіксовано.",
+    newBill: "Додати витрату",
+    expenses: "Витрати",
   },
 
   // Polls
@@ -299,6 +343,7 @@ export default {
     deletePoll: "Видалити опитування",
     deletePollConfirm: "Ви впевнені, що хочете видалити це опитування?",
     failedToDelete: "Не вдалося видалити опитування",
+    noActivePollsDescription: "У цьому домі ще немає активних опитувань.",
   },
 
   // Settings
@@ -322,6 +367,7 @@ export default {
 
   // Members
   members: {
+    you: "(ви)",
     title: "Учасники",
     admin: "Адмін",
     member: "Учасник",
@@ -366,6 +412,7 @@ export default {
     pushBlocked: "Push-сповіщення заблоковано",
     pushBlockedText: "Увімкніть їх у налаштуваннях браузера",
     pushError: "Не вдалося увімкнути push-сповіщення",
+    hiddenForYou: "Сповіщення приховано для вас.",
   },
 
   // Security
@@ -389,9 +436,56 @@ export default {
     passwordTooShort: "Пароль повинен містити мінімум 6 символів",
     passwordChanged: "Пароль успішно змінено",
     passwordChangeFailed: "Не вдалося змінити пароль",
+    currentPasswordPlaceholder: "Введіть поточний пароль",
+    newPasswordPlaceholder: "Введіть новий пароль",
+    confirmPasswordPlaceholder: "Підтвердіть новий пароль",
   },
 
   // Profile
+  // Smart Home
+  smartHome: {
+    title: "Розумний дім",
+    manageDevices: "Керувати пристроями",
+    connection: "Підключення розумного дому",
+    dashboard: "Панель розумного дому",
+    statusConnected: "Статус: підключено",
+    urlPrefix: "URL:",
+    errorPrefix: "Помилка:",
+    connectDescription: "Підключіть свій Home Assistant, щоб керувати пристроями.",
+    urlFieldLabel: "URL Home Assistant",
+    tokenFieldLabel: "Довгостроковий токен доступу",
+    connect: "Підключити",
+    disconnect: "Відключити",
+    connectedSuccess: "Home Assistant успішно підключено",
+    disconnectedSuccess: "Відключено від Home Assistant",
+    failedToConnect: "Не вдалося підключитися до Home Assistant",
+    failedToDisconnect: "Не вдалося відключитися",
+    allDevices: "Усі пристрої",
+    noDevicesYet: "Пристроїв ще не додано",
+    connectHomeAssistant: "Підключити Home Assistant",
+    addDevice: "Додати пристрій",
+    editDevice: "Редагувати пристрій",
+    backToList: "Назад до списку",
+    deviceNameLabel: "Назва пристрою",
+    deviceNamePlaceholder: "напр., Світло у вітальні",
+    roomDeviceNamePlaceholder: "напр., Стельове світло",
+    assignRoomOptional: "Призначити кімнату (необов'язково)",
+    roomLabel: "Кімната",
+    selectDeviceToAdd: "Виберіть пристрій для додавання",
+    noNewDevicesFound: "Нових пристроїв не знайдено",
+    connectedStatus: "Підключено",
+    disconnectedStatus: "Відключено",
+    unknownState: "Невідомо",
+    noRoomAssigned: "Без кімнати",
+    noDevicesInRoom: "У цій кімнаті немає пристроїв",
+    deleteDeviceTitle: "Видалити пристрій",
+    deleteDeviceConfirm: "Дійсно видалити {name}?",
+    failedToUpdateDevice: "Не вдалося оновити пристрій",
+    failedToDeleteDevice: "Не вдалося видалити пристрій",
+    failedToAddDevice: "Не вдалося додати пристрій",
+    failedToDiscoverDevices: "Не вдалося знайти пристрої",
+  },
+
   profile: {
     homeAdmin: "Адміністратор дому",
     member: "Учасник",
@@ -436,6 +530,9 @@ export default {
     memberProfileAssignedSplitAmount: "Призначена сума розподілу",
     memberProfileLoadFailed: "Не вдалося завантажити профіль учасника",
     memberProfileVisibilityFailed: "Не вдалося оновити видимість",
+    joinRequestSentTitle: "Запит на дім",
+    joinRequestSentMessage: "Запит надіслано. Очікуйте на схвалення адміністратора.",
+    failedToUpdateUsername: "Не вдалося оновити ім'я користувача",
   },
 
   // Rooms
@@ -454,6 +551,9 @@ export default {
     added: "Додано {date}",
     failedToCreate: "Не вдалося створити кімнату",
     failedToDelete: "Не вдалося видалити кімнату",
+    failedToUpdate: "Не вдалося оновити кімнату",
+    editRoom: "Редагувати кімнату",
+    roomTasks: "Завдання кімнати",
   },
 
   // Not Found
@@ -472,6 +572,16 @@ export default {
     polls: "Опитування",
     profile: "Профіль",
     notes: "Нотатки",
+  },
+
+  install: {
+    iosPrompt: "Встановіть цей додаток на свій iPhone",
+    iosInstructionsPrefix: "Натисніть",
+    iosShareButton: "Поділитися",
+    iosInstructionsMiddle: "потім",
+    iosAddToHomeScreen: '"На екран Домівка"',
+    prompt: "Встановіть додаток для кращого досвіду",
+    install: "Встановити",
   },
 
   notes: {
@@ -493,5 +603,13 @@ export default {
     mentions: "Mentions",
     mentionedInNote: "Mentioned in this note",
     selectCategory: "Select Category",
+    mentionedBlocks: "Згадані блоки (торкніться, щоб видалити)",
+    linkCategory: "Пов'язати категорію",
+    browse: "Огляд →",
+    icon: "ІКОНКА",
+    color: "КОЛІР",
+    failedToCreateCategory: "Не вдалося створити категорію",
+    failedToSave: "Не вдалося зберегти нотатку",
+    failedToDelete: "Не вдалося видалити нотатку",
   },
 };

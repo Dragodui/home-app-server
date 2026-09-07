@@ -206,7 +206,7 @@ export interface Notification {
   id: number;
   from?: number;
   to: number;
-  homeId?: number;
+  homeId: number;
   description: string;
   read: boolean;
   createdAt: string;

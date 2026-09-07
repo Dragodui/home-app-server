@@ -532,7 +532,7 @@ export default function NotesScreen() {
       await loadNotesAndCategories();
     } catch (e) {
       console.error(e);
-      alert(t.common.error, "Failed to create category");
+      alert(t.common.error, t.notes.failedToCreateCategory);
     } finally {
       setSavingCategory(false);
     }
@@ -602,7 +602,7 @@ export default function NotesScreen() {
       await loadNotesAndCategories();
     } catch (e) {
       console.error(e);
-      alert(t.common.error, "Failed to save note");
+      alert(t.common.error, t.notes.failedToSave);
     } finally {
       setSavingNote(false);
     }
@@ -621,7 +621,7 @@ export default function NotesScreen() {
             await loadNotesAndCategories();
           } catch (e) {
             console.error(e);
-            alert(t.common.error, "Failed to delete note");
+            alert(t.common.error, t.notes.failedToDelete);
           }
         },
       },
@@ -1100,7 +1100,7 @@ export default function NotesScreen() {
             {(isAdmin || selectedNoteForActions.createdBy === user?.id) && (
               <>
                 <Button
-                  title="Edit Note"
+                  title={t.notes.editNote}
                   variant="secondary"
                   icon={<Edit2 size={16} color={theme.text} />}
                   onPress={() => {
@@ -1237,7 +1237,7 @@ export default function NotesScreen() {
                           className="text-[10px] font-manrope-bold uppercase tracking-wider mb-2"
                           style={{ color: theme.textSecondary }}
                         >
-                          Mentioned Blocks (Tap to Remove)
+                          {t.notes.mentionedBlocks}
                         </Text>
                         <View className="flex-row flex-wrap gap-2">
                           {synced.userIds.map((uid) => {
@@ -1468,7 +1468,9 @@ export default function NotesScreen() {
                               {item.name}
                             </Text>
                             {(suggestionStep === "shopping_categories" || suggestionStep === "bill_categories") && (
-                              <Text className="text-[10px] font-manrope text-accent-purple">Link Category</Text>
+                              <Text className="text-[10px] font-manrope text-accent-purple">
+                                {t.notes.linkCategory}
+                              </Text>
                             )}
                           </View>
                         </TouchableOpacity>
@@ -1485,7 +1487,7 @@ export default function NotesScreen() {
                             }}
                           >
                             <Text className="text-xs font-manrope-bold" style={{ color: theme.textSecondary }}>
-                              Browse →
+                              {t.notes.browse}
                             </Text>
                           </TouchableOpacity>
                         )}
@@ -1502,7 +1504,7 @@ export default function NotesScreen() {
                             }}
                           >
                             <Text className="text-xs font-manrope-bold" style={{ color: theme.textSecondary }}>
-                              Browse →
+                              {t.notes.browse}
                             </Text>
                           </TouchableOpacity>
                         )}
@@ -1546,7 +1548,7 @@ export default function NotesScreen() {
 
             <View>
               <Text className="text-xs font-manrope-semibold mb-2" style={{ color: theme.textSecondary }}>
-                ICON
+                {t.notes.icon}
               </Text>
               <View className="flex-row flex-wrap gap-2">
                 {[
@@ -1588,7 +1590,7 @@ export default function NotesScreen() {
 
             <View>
               <Text className="text-xs font-manrope-semibold mb-2" style={{ color: theme.textSecondary }}>
-                COLOR
+                {t.notes.color}
               </Text>
               <View className="flex-row flex-wrap gap-2">
                 {PRESET_COLORS.map((color) => (

@@ -210,21 +210,21 @@ export default function SecurityScreen() {
         <View className="flex-1">
           <Input
             label={t.security.currentPassword || "Current Password"}
-            placeholder="Enter current password"
+            placeholder={t.security.currentPasswordPlaceholder}
             value={currentPassword}
             onChangeText={setCurrentPassword}
             secureTextEntry
           />
           <Input
             label={t.security.newPassword || "New Password"}
-            placeholder="Enter new password"
+            placeholder={t.security.newPasswordPlaceholder}
             value={newPassword}
             onChangeText={setNewPassword}
             secureTextEntry
           />
           <Input
             label={t.security.confirmPassword || "Confirm Password"}
-            placeholder="Confirm new password"
+            placeholder={t.security.confirmPasswordPlaceholder}
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             secureTextEntry

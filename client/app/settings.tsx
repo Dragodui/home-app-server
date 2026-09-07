@@ -59,9 +59,9 @@ export default function SettingsScreen() {
     try {
       await smarthomeApi.connect(home.id, haUrl, haToken);
       await fetchHAStatus();
-      alert(t.common.success || "Success", "Home Assistant connected successfully");
+      alert(t.common.success, t.smartHome.connectedSuccess);
     } catch (_error) {
-      alert(t.common.error, "Failed to connect to Home Assistant");
+      alert(t.common.error, t.smartHome.failedToConnect);
     } finally {
       setHaLoading(false);
     }
@@ -74,9 +74,9 @@ export default function SettingsScreen() {
       await smarthomeApi.disconnect(home.id);
       await fetchHAStatus();
       setHaToken("");
-      alert(t.common.success || "Success", "Disconnected from Home Assistant");
+      alert(t.common.success, t.smartHome.disconnectedSuccess);
     } catch (_error) {
-      alert(t.common.error, "Failed to disconnect");
+      alert(t.common.error, t.smartHome.failedToDisconnect);
     } finally {
       setHaLoading(false);
     }
@@ -229,7 +229,7 @@ export default function SettingsScreen() {
                     <Wifi size={20} color="#FFFFFF" />
                   </View>
                   <Text className="flex-1 text-base font-manrope-semibold" style={{ color: theme.text }}>
-                    Smart Home Connection
+                    {t.smartHome.connection}
                   </Text>
                   <ChevronRight size={20} color={theme.textSecondary} />
                 </TouchableOpacity>
@@ -246,7 +246,7 @@ export default function SettingsScreen() {
                     <Tv size={20} color="#FFFFFF" />
                   </View>
                   <Text className="flex-1 text-base font-manrope-semibold" style={{ color: theme.text }}>
-                    Smart Home Dashboard
+                    {t.smartHome.dashboard}
                   </Text>
                   <ChevronRight size={20} color={theme.textSecondary} />
                 </TouchableOpacity>
@@ -319,7 +319,12 @@ export default function SettingsScreen() {
       </Modal>
 
       {/* Smart Home Modal */}
-      <Modal visible={showSmartHomeModal} onClose={() => setShowSmartHomeModal(false)} title="Smart Home" height="full">
+      <Modal
+        visible={showSmartHomeModal}
+        onClose={() => setShowSmartHomeModal(false)}
+        title={t.smartHome.title}
+        height="full"
+      >
         <View className="flex-1">
           {haLoading ? (
             <ActivityIndicator size="large" color={theme.accent.cyan} />
@@ -327,36 +332,45 @@ export default function SettingsScreen() {
             <View>
               <View className="p-5 rounded-16 mb-5" style={{ backgroundColor: theme.surface }}>
                 <Text className="text-lg font-manrope-bold mb-2" style={{ color: theme.text }}>
-                  Status: Connected
+                  {t.smartHome.statusConnected}
                 </Text>
                 <Text className="mb-2" style={{ color: theme.textSecondary }}>
-                  URL: {haStatus.url}
+                  {t.smartHome.urlPrefix} {haStatus.url}
                 </Text>
-                {haStatus.error && <Text style={{ color: theme.accent.danger }}>Error: {haStatus.error}</Text>}
+                {haStatus.error && (
+                  <Text style={{ color: theme.accent.danger }}>
+                    {t.smartHome.errorPrefix} {haStatus.error}
+                  </Text>
+                )}
               </View>
-              <Button title="Disconnect" onPress={handleDisconnectHA} variant="danger" style={{ marginTop: 20 }} />
+              <Button
+                title={t.smartHome.disconnect}
+                onPress={handleDisconnectHA}
+                variant="danger"
+                style={{ marginTop: 20 }}
+              />
             </View>
           ) : (
             <View>
               <Text className="mb-5" style={{ color: theme.textSecondary }}>
-                Connect your Home Assistant instance to control devices.
+                {t.smartHome.connectDescription}
               </Text>
               <Input
-                label="Home Assistant URL"
+                label={t.smartHome.urlFieldLabel}
                 placeholder="http://homeassistant.local:8123"
                 value={haUrl}
                 onChangeText={setHaUrl}
                 autoCapitalize="none"
               />
               <Input
-                label="Long-Lived Access Token"
+                label={t.smartHome.tokenFieldLabel}
                 placeholder="eyJhbGciOi..."
                 value={haToken}
                 onChangeText={setHaToken}
                 secureTextEntry
               />
               <Button
-                title="Connect"
+                title={t.smartHome.connect}
                 onPress={handleConnectHA}
                 variant="primary"
                 style={{ marginTop: 20 }}

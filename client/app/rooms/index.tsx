@@ -148,7 +148,7 @@ export default function RoomsScreen() {
       setSelectedIcon("home");
     } catch (error) {
       console.error("Error saving room:", error);
-      alert(t.common.error, editingRoomId ? "Failed to update room" : t.rooms.failedToCreate);
+      alert(t.common.error, editingRoomId ? t.rooms.failedToUpdate : t.rooms.failedToCreate);
     } finally {
       setIsLoading(false);
     }
@@ -316,7 +316,7 @@ export default function RoomsScreen() {
           setShowCreateModal(false);
           setEditingRoomId(null);
         }}
-        title={editingRoomId ? "Edit room" : t.rooms.newRoom}
+        title={editingRoomId ? t.rooms.editRoom : t.rooms.newRoom}
         height="full"
       >
         <View className="flex-1">
@@ -409,7 +409,7 @@ export default function RoomsScreen() {
             }}
           >
             <Text className="font-manrope-semibold" style={{ color: theme.text }}>
-              Edit
+              {t.common.edit}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity

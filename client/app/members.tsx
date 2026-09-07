@@ -186,11 +186,11 @@ export default function MembersScreen() {
           <View className="flex-1">
             <View className="flex-row items-center gap-2">
               <Text className="text-base font-manrope-semibold" style={{ color: theme.text }}>
-                {member.user?.name || "Unknown"}
+                {member.user?.name || t.profile.memberProfileUnknown}
               </Text>
               {isCurrentUser && (
                 <Text className="text-xs font-manrope" style={{ color: theme.textSecondary }}>
-                  (you)
+                  {t.members.you}
                 </Text>
               )}
             </View>

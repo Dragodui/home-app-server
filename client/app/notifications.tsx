@@ -37,12 +37,12 @@ export default function NotificationsScreen() {
 
   const getNotificationKey = useCallback(
     (notification: Notification | HomeNotification) =>
-      "homeId" in notification ? `home:${notification.homeId}:${notification.id}` : `user:${notification.id}`,
+      !("to" in notification) ? `home:${notification.homeId}:${notification.id}` : `user:${notification.id}`,
     [],
   );
   const getSwipeableKey = useCallback(
     (notification: Notification | HomeNotification) =>
-      `${notification.id}-${"homeId" in notification ? "home" : "user"}`,
+      `${notification.id}-${!("to" in notification) ? "home" : "user"}`,
     [],
   );
 
@@ -74,15 +74,15 @@ export default function NotificationsScreen() {
       hidden.add(key);
       await AsyncStorage.setItem(hiddenStorageKey, JSON.stringify(Array.from(hidden)));
       setNotifications((prev) => prev.filter((item) => getNotificationKey(item) !== key));
-      show({ title: "Deleted", message: "Notification hidden for you." });
+      show({ title: t.common.deleted, message: t.notifications.hiddenForYou });
     },
-    [getHiddenNotificationKeys, getNotificationKey, hiddenStorageKey, show],
+    [getHiddenNotificationKeys, getNotificationKey, hiddenStorageKey, show, t],
   );
 
   const markAsRead = useCallback(
     async (notification: Notification | HomeNotification) => {
       if (notification.read) return;
-      if ("homeId" in notification) {
+      if (!("to" in notification)) {
         await notificationApi.markHomeNotificationAsRead(notification.homeId, notification.id);
       } else {
         await notificationApi.markAsRead(notification.id);
@@ -310,7 +310,7 @@ export default function NotificationsScreen() {
                     >
                       <Trash2 size={18} color="#1C1C1E" />
                       <Text className="text-xs font-manrope-semibold mt-1" style={{ color: "#1C1C1E" }}>
-                        Delete
+                        {t.common.delete}
                       </Text>
                     </TouchableOpacity>
                   )}

@@ -33,6 +33,11 @@ export default {
       "grudzień",
     ],
     weekdaysShort: ["Pn", "Wt", "Śr", "Cz", "Pt", "Sb", "Nd"],
+    edit: "Edytuj",
+    open: "Otwórz",
+    read: "Przeczytane",
+    deleted: "Usunięto",
+    pending: "Oczekujące",
   },
 
   // Auth
@@ -41,7 +46,7 @@ export default {
     tagline: "Współmieszkanie na nowo.",
     joinTagline: "Inteligentne życie zaczyna się tutaj.",
     email: "E-MAIL",
-    emailPlaceholder: "hello@gome.app",
+    emailPlaceholder: "hello@home.app",
     password: "HASŁO",
     passwordPlaceholder: "Wpisz swoje hasło",
     createPassword: "Utwórz hasło",
@@ -71,6 +76,23 @@ export default {
     failedToGetUserInfo: "Nie udało się pobrać informacji o użytkowniku z Google",
     forgotPassword: "Zapomniałeś hasła?",
     leaveHome: "Opuść dom",
+    emailRequired: "Wprowadź swój adres e-mail",
+    failedToSendResetEmail: "Nie udało się wysłać e-maila resetującego",
+    checkYourEmail: "Sprawdź swoją pocztę",
+    resetLinkSentTo: "Wysłaliśmy link do zresetowania hasła na",
+    backToLogin: "Powrót do logowania",
+    forgotPasswordDescription: "Bez obaw! Wprowadź swój e-mail, a wyślemy Ci link do zresetowania hasła.",
+    emailAddressLabel: "Adres e-mail",
+    sendResetLink: "Wyślij link resetujący",
+    rememberYourPassword: "Pamiętasz swoje hasło?",
+    invalidResetToken: "Nieprawidłowy lub brakujący token resetowania",
+    passwordMinLength8: "Hasło musi mieć co najmniej 8 znaków",
+    failedToResetPassword: "Nie udało się zresetować hasła",
+    passwordResetTitle: "Hasło zresetowane!",
+    passwordResetSuccessText: "Twoje hasło zostało pomyślnie zresetowane.\nMożesz teraz zalogować się nowym hasłem.",
+    goToLogin: "Przejdź do logowania",
+    resetPasswordTitle: "Zresetuj hasło",
+    resetPasswordDescription: "Wprowadź poniżej swoje nowe hasło.",
   },
 
   // Verification
@@ -167,7 +189,11 @@ export default {
       failedToDelete: "Nie udało się usunąć harmonogramu.",
       selectUsers: "Wybierz co najmniej 2 członków do rotacji",
       scheduled: "Zaplanowane",
+      deleteAction: "Usuń harmonogram",
     },
+    failedToUpdate: "Nie udało się zaktualizować zadania.",
+    editTask: "Edytuj zadanie",
+    noRoom: "Brak pokoju",
   },
 
   // Shopping
@@ -206,6 +232,11 @@ export default {
       books: "Książki",
       gifts: "Prezenty",
     },
+    editItem: "Edytuj produkt",
+    noItems: "Brak produktów",
+    noItemsHint: "Twoja lista zakupów jest pusta.",
+    noLists: "Brak list zakupów",
+    noListsHint: "Utwórz pierwszą kategorię listy zakupów, aby zacząć dodawać produkty.",
   },
 
   // Budget / Expenses
@@ -265,6 +296,19 @@ export default {
     allTime: "Cały czas",
     currentMonth: "Bieżący miesiąc",
     viewReceipt: "Zobacz paragon",
+    failedToUpdateCategory: "Nie udało się zaktualizować kategorii",
+    failedToUpdateBill: "Nie udało się zaktualizować rachunku",
+    private: "Prywatny",
+    pdf: "PDF",
+    regularExpense: "Regularny wydatek",
+    regularExpenseHint: "Dodawaj ten rachunek automatycznie",
+    repeat: "Powtarzaj",
+    receiptFile: "Plik paragonu",
+    editCategory: "Edytuj kategorię",
+    editExpense: "Edytuj wydatek",
+    noExpensesHint: "Brak zarejestrowanych wydatków w tym okresie.",
+    newBill: "Dodaj wydatek",
+    expenses: "Wydatki",
   },
 
   // Polls
@@ -299,6 +343,7 @@ export default {
     deletePoll: "Usuń ankietę",
     deletePollConfirm: "Czy na pewno chcesz usunąć tę ankietę?",
     failedToDelete: "Nie udało się usunąć ankiety",
+    noActivePollsDescription: "W tym domu nie ma jeszcze żadnych aktywnych ankiet.",
   },
 
   // Settings
@@ -322,6 +367,7 @@ export default {
 
   // Members
   members: {
+    you: "(ty)",
     title: "Członkowie",
     admin: "Admin",
     member: "Członek",
@@ -366,6 +412,7 @@ export default {
     pushBlocked: "Powiadomienia push zablokowane",
     pushBlockedText: "Włącz je w ustawieniach przeglądarki",
     pushError: "Nie udało się włączyć powiadomień push",
+    hiddenForYou: "Powiadomienie ukryte dla Ciebie.",
   },
 
   // Security
@@ -389,9 +436,56 @@ export default {
     passwordTooShort: "Hasło musi mieć co najmniej 6 znaków",
     passwordChanged: "Hasło zostało zmienione",
     passwordChangeFailed: "Nie udało się zmienić hasła",
+    currentPasswordPlaceholder: "Wprowadź obecne hasło",
+    newPasswordPlaceholder: "Wprowadź nowe hasło",
+    confirmPasswordPlaceholder: "Potwierdź nowe hasło",
   },
 
   // Profile
+  // Smart Home
+  smartHome: {
+    title: "Inteligentny dom",
+    manageDevices: "Zarządzaj urządzeniami",
+    connection: "Połączenie inteligentnego domu",
+    dashboard: "Panel inteligentnego domu",
+    statusConnected: "Status: połączono",
+    urlPrefix: "URL:",
+    errorPrefix: "Błąd:",
+    connectDescription: "Połącz swoją instancję Home Assistant, aby sterować urządzeniami.",
+    urlFieldLabel: "URL Home Assistant",
+    tokenFieldLabel: "Długoterminowy token dostępu",
+    connect: "Połącz",
+    disconnect: "Rozłącz",
+    connectedSuccess: "Home Assistant połączony pomyślnie",
+    disconnectedSuccess: "Rozłączono z Home Assistant",
+    failedToConnect: "Nie udało się połączyć z Home Assistant",
+    failedToDisconnect: "Nie udało się rozłączyć",
+    allDevices: "Wszystkie urządzenia",
+    noDevicesYet: "Nie dodano jeszcze żadnych urządzeń",
+    connectHomeAssistant: "Połącz Home Assistant",
+    addDevice: "Dodaj urządzenie",
+    editDevice: "Edytuj urządzenie",
+    backToList: "Powrót do listy",
+    deviceNameLabel: "Nazwa urządzenia",
+    deviceNamePlaceholder: "np. Lampa w salonie",
+    roomDeviceNamePlaceholder: "np. Lampa sufitowa",
+    assignRoomOptional: "Przypisz pokój (opcjonalnie)",
+    roomLabel: "Pokój",
+    selectDeviceToAdd: "Wybierz urządzenie do dodania",
+    noNewDevicesFound: "Nie znaleziono nowych urządzeń",
+    connectedStatus: "Połączono",
+    disconnectedStatus: "Rozłączono",
+    unknownState: "Nieznany",
+    noRoomAssigned: "Brak pokoju",
+    noDevicesInRoom: "Brak urządzeń w tym pokoju",
+    deleteDeviceTitle: "Usuń urządzenie",
+    deleteDeviceConfirm: "Czy na pewno usunąć {name}?",
+    failedToUpdateDevice: "Nie udało się zaktualizować urządzenia",
+    failedToDeleteDevice: "Nie udało się usunąć urządzenia",
+    failedToAddDevice: "Nie udało się dodać urządzenia",
+    failedToDiscoverDevices: "Nie udało się wykryć urządzeń",
+  },
+
   profile: {
     homeAdmin: "Administrator domu",
     member: "Członek",
@@ -436,6 +530,9 @@ export default {
     memberProfileAssignedSplitAmount: "Przypisana kwota podziału",
     memberProfileLoadFailed: "Nie udało się załadować profilu członka",
     memberProfileVisibilityFailed: "Nie udało się zaktualizować widoczności",
+    joinRequestSentTitle: "Prośba o dom",
+    joinRequestSentMessage: "Prośba wysłana. Czekaj na zatwierdzenie przez administratora.",
+    failedToUpdateUsername: "Nie udało się zaktualizować nazwy użytkownika",
   },
 
   // Rooms
@@ -454,6 +551,9 @@ export default {
     added: "Dodano {date}",
     failedToCreate: "Nie udało się utworzyć pokoju",
     failedToDelete: "Nie udało się usunąć pokoju",
+    failedToUpdate: "Nie udało się zaktualizować pokoju",
+    editRoom: "Edytuj pokój",
+    roomTasks: "Zadania pokoju",
   },
 
   // Not Found
@@ -472,6 +572,16 @@ export default {
     polls: "Ankiety",
     profile: "Profil",
     notes: "Notatki",
+  },
+
+  install: {
+    iosPrompt: "Zainstaluj tę aplikację na swoim iPhonie",
+    iosInstructionsPrefix: "Dotknij",
+    iosShareButton: "Udostępnij",
+    iosInstructionsMiddle: "a następnie",
+    iosAddToHomeScreen: '"Do ekranu głównego"',
+    prompt: "Zainstaluj aplikację, aby uzyskać lepsze wrażenia",
+    install: "Zainstaluj",
   },
 
   notes: {
@@ -493,5 +603,13 @@ export default {
     mentions: "Mentions",
     mentionedInNote: "Mentioned in this note",
     selectCategory: "Select Category",
+    mentionedBlocks: "Wspomniane bloki (dotknij, aby usunąć)",
+    linkCategory: "Połącz kategorię",
+    browse: "Przeglądaj →",
+    icon: "IKONA",
+    color: "KOLOR",
+    failedToCreateCategory: "Nie udało się utworzyć kategorii",
+    failedToSave: "Nie udało się zapisać notatki",
+    failedToDelete: "Nie udało się usunąć notatki",
   },
 };

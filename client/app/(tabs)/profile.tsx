@@ -68,7 +68,7 @@ export default function ProfileScreen() {
       }
     } catch (error) {
       console.error("Error picking image:", error);
-      alert("Error", "Failed to pick image");
+      alert(t.common.error, t.profile.failedToPick);
     }
   };
 
@@ -99,7 +99,7 @@ export default function ProfileScreen() {
       }
     } catch (error) {
       console.error("Error uploading image:", error);
-      alert("Error", "Failed to upload image");
+      alert(t.common.error, t.profile.failedToUpload);
     } finally {
       setIsUploading(false);
     }
@@ -130,7 +130,7 @@ export default function ProfileScreen() {
       setShowCreateModal(false);
       setHomeName("");
     } else {
-      alert("Error", result.error || "Failed to create home");
+      alert(t.common.error, result.error || t.profile.failedToCreate);
     }
   };
 
@@ -145,11 +145,11 @@ export default function ProfileScreen() {
       setShowJoinModal(false);
       setInviteCode("");
       show({
-        title: "Home request",
-        message: "Request sent. Wait for admin approval.",
+        title: t.profile.joinRequestSentTitle,
+        message: t.profile.joinRequestSentMessage,
       });
     } else {
-      alert("Error", result.error || "Failed to join home");
+      alert(t.common.error, result.error || t.profile.failedToJoin);
     }
   };
 
@@ -180,7 +180,7 @@ export default function ProfileScreen() {
     if (result.success) {
       setIsEditingUsername(false);
     } else {
-      setUsernameError(result.error || "Failed to update username");
+      setUsernameError(result.error || t.profile.failedToUpdateUsername);
     }
   };
 

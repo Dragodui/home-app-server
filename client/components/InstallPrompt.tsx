@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Download, Share, X } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Platform, Pressable, Text, View } from "react-native";
+import { useI18n } from "@/stores/i18nStore";
 import { useTheme } from "@/stores/themeStore";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -32,6 +33,7 @@ export function InstallPrompt() {
   const [showIOSPrompt, setShowIOSPrompt] = useState(false);
   const [debugInfo, setDebugInfo] = useState<string>("");
   const { theme } = useTheme();
+  const { t } = useI18n();
 
   useEffect(() => {
     if (Platform.OS !== "web") return;
@@ -133,15 +135,15 @@ export function InstallPrompt() {
         <View className="flex-row items-center">
           <Share size={20} color={theme.accent.purple} />
           <Text className="ml-3 flex-1 text-sm font-semibold" style={{ color: theme.text }}>
-            Install this app on your iPhone
+            {t.install.iosPrompt}
           </Text>
           <Pressable onPress={handleIOSDismiss} className="p-1">
             <X size={18} color={theme.textSecondary} />
           </Pressable>
         </View>
         <Text className="mt-2 text-xs" style={{ color: theme.textSecondary }}>
-          Tap the <Text style={{ fontWeight: "600" }}>Share</Text> button, then{" "}
-          <Text style={{ fontWeight: "600" }}>"Add to Home Screen"</Text>
+          {t.install.iosInstructionsPrefix} <Text style={{ fontWeight: "600" }}>{t.install.iosShareButton}</Text>{" "}
+          {t.install.iosInstructionsMiddle} <Text style={{ fontWeight: "600" }}>{t.install.iosAddToHomeScreen}</Text>
         </Text>
       </View>
     );
@@ -156,14 +158,14 @@ export function InstallPrompt() {
     >
       <Download size={20} color={theme.accent.purple} />
       <Text className="ml-3 flex-1 text-sm font-semibold" style={{ color: theme.text }}>
-        Install app for a better experience
+        {t.install.prompt}
       </Text>
       <Pressable
         onPress={handleInstall}
         className="ml-2 rounded-xl px-4 py-2"
         style={{ backgroundColor: theme.accent.purple }}
       >
-        <Text className="text-sm font-bold text-white">Install</Text>
+        <Text className="text-sm font-bold text-white">{t.install.install}</Text>
       </Pressable>
       <Pressable onPress={handleDismiss} className="ml-2 p-1">
         <X size={18} color={theme.textSecondary} />

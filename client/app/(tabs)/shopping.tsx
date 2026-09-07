@@ -876,7 +876,7 @@ export default function ShoppingScreen() {
             }}
           >
             <Text className="font-manrope-semibold" style={{ color: theme.text }}>
-              Edit
+              {t.common.edit}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -917,7 +917,7 @@ export default function ShoppingScreen() {
             }}
           >
             <Text className="font-manrope-semibold" style={{ color: theme.text }}>
-              Edit
+              {t.common.edit}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -941,7 +941,7 @@ export default function ShoppingScreen() {
           setShowEditItemModal(false);
           setSelectedItemForActions(null);
         }}
-        title="Edit item"
+        title={t.shopping.editItem}
         height="auto"
       >
         <View className="gap-4">
@@ -953,7 +953,7 @@ export default function ShoppingScreen() {
             disabled={!editItemName.trim() || savingItemEdit}
           >
             <Text className="font-manrope-semibold" style={{ color: theme.background }}>
-              Save
+              {t.common.save}
             </Text>
           </TouchableOpacity>
         </View>

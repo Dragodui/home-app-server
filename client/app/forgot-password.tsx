@@ -7,6 +7,7 @@ import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import { useResponsiveLayout } from "@/lib/useResponsiveLayout";
 import { useAuth } from "@/stores/authStore";
+import { useI18n } from "@/stores/i18nStore";
 import { useTheme } from "@/stores/themeStore";
 
 export default function ForgotPasswordScreen() {
@@ -14,6 +15,7 @@ export default function ForgotPasswordScreen() {
   const insets = useSafeAreaInsets();
   const { forgotPassword } = useAuth();
   const { theme } = useTheme();
+  const { t } = useI18n();
   const { horizontalPadding } = useResponsiveLayout();
 
   const [email, setEmail] = useState("");
@@ -23,7 +25,7 @@ export default function ForgotPasswordScreen() {
 
   const handleSubmit = async () => {
     if (!email) {
-      setError("Please enter your email");
+      setError(t.auth.emailRequired);
       return;
     }
 
@@ -36,7 +38,7 @@ export default function ForgotPasswordScreen() {
     if (result.success) {
       setEmailSent(true);
     } else {
-      setError(result.error || "Failed to send reset email");
+      setError(result.error || t.auth.failedToSendResetEmail);
     }
   };
 
@@ -62,15 +64,21 @@ export default function ForgotPasswordScreen() {
             <CheckCircle size={64} color={theme.accent.purple} />
           </View>
           <Text className="text-[28px] font-manrope-bold mb-4 text-center" style={{ color: theme.text }}>
-            Check Your Email
+            {t.auth.checkYourEmail}
           </Text>
           <Text className="text-base font-manrope text-center leading-6 mb-8" style={{ color: theme.textSecondary }}>
-            We've sent a password reset link to{"\n"}
+            {t.auth.resetLinkSentTo}
+            {"\n"}
             <Text className="font-manrope-bold" style={{ color: theme.text }}>
               {email}
             </Text>
           </Text>
-          <Button title="Back to Login" onPress={() => router.replace("/login")} variant="purple" className="w-full" />
+          <Button
+            title={t.auth.backToLogin}
+            onPress={() => router.replace("/login")}
+            variant="purple"
+            className="w-full"
+          />
         </View>
       </View>
     );
@@ -110,17 +118,17 @@ export default function ForgotPasswordScreen() {
             <Mail size={40} color="#1C1C1E" />
           </View>
           <Text className="text-[32px] font-manrope-bold mb-3" style={{ color: theme.text }}>
-            Forgot Password?
+            {t.auth.forgotPassword}
           </Text>
           <Text className="text-base font-manrope leading-6" style={{ color: theme.textSecondary }}>
-            No worries! Enter your email and we'll send you a reset link.
+            {t.auth.forgotPasswordDescription}
           </Text>
         </View>
 
         <View className="flex-1">
           <Input
-            label="Email Address"
-            placeholder="hello@home.app"
+            label={t.auth.emailAddressLabel}
+            placeholder={t.auth.emailPlaceholder}
             value={email}
             onChangeText={(text) => {
               setEmail(text);
@@ -133,7 +141,7 @@ export default function ForgotPasswordScreen() {
           />
 
           <Button
-            title="Send Reset Link"
+            title={t.auth.sendResetLink}
             onPress={handleSubmit}
             loading={isLoading}
             disabled={isLoading || !email}
@@ -144,11 +152,11 @@ export default function ForgotPasswordScreen() {
 
         <View className="flex-row justify-center items-center pt-6" style={{ paddingBottom: insets.bottom + 24 }}>
           <Text className="text-sm font-manrope" style={{ color: theme.textSecondary }}>
-            Remember your password?{" "}
+            {t.auth.rememberYourPassword}{" "}
           </Text>
           <TouchableOpacity onPress={() => router.replace("/login")}>
             <Text className="text-sm font-manrope-bold underline" style={{ color: theme.text }}>
-              Sign In
+              {t.auth.logIn}
             </Text>
           </TouchableOpacity>
         </View>

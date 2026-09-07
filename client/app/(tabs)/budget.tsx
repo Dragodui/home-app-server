@@ -181,12 +181,14 @@ const DonutChart = ({
   strokeWidth = 20,
   total,
   theme,
+  totalLabel,
 }: {
   data: { value: number; color: string }[];
   size?: number;
   strokeWidth?: number;
   total: number;
   theme: any;
+  totalLabel: string;
 }) => {
   const center = size / 2;
   const radius = (size - strokeWidth) / 2;
@@ -229,7 +231,7 @@ const DonutChart = ({
           {total % 1 === 0 ? total.toFixed(0) : total.toFixed(2)}
         </Text>
         <Text className="text-xs font-manrope" style={{ color: theme.textSecondary }}>
-          Total
+          {totalLabel}
         </Text>
       </View>
     </View>
@@ -550,7 +552,7 @@ export default function BudgetScreen() {
       await loadData();
     } catch (error) {
       console.error("Error editing category:", error);
-      alert(t.common.error, "Failed to update category");
+      alert(t.common.error, t.budget.failedToUpdateCategory);
     } finally {
       setSavingCategoryEdit(false);
     }
@@ -688,7 +690,7 @@ export default function BudgetScreen() {
       await loadData();
     } catch (error) {
       console.error("Error editing bill:", error);
-      alert(t.common.error, "Failed to update bill");
+      alert(t.common.error, t.budget.failedToUpdateBill);
     } finally {
       setSavingBillEdit(false);
     }
@@ -1257,7 +1259,7 @@ export default function BudgetScreen() {
           <>
             {totalSpend > 0 && (
               <View className="items-center mb-4">
-                <DonutChart data={chartData} total={totalSpend} theme={theme} />
+                <DonutChart data={chartData} total={totalSpend} theme={theme} totalLabel={t.common.total} />
               </View>
             )}
 
@@ -1388,7 +1390,7 @@ export default function BudgetScreen() {
                           >
                             <Shield size={10} color={theme.textSecondary} />
                             <Text className="text-[10px] font-manrope-semibold" style={{ color: theme.textSecondary }}>
-                              Private
+                              {t.budget.private}
                             </Text>
                           </View>
                         )}
@@ -1608,7 +1610,7 @@ export default function BudgetScreen() {
                         {selectedFileName || "document.pdf"}
                       </Text>
                       <Text className="text-xs" style={{ color: theme.textSecondary }}>
-                        PDF
+                        {t.budget.pdf}
                       </Text>
                     </View>
                   </View>
@@ -1758,7 +1760,7 @@ export default function BudgetScreen() {
 
           {/* Manual entry / Category & Amount */}
           <Text className="text-xs font-manrope-bold uppercase mb-2" style={{ color: theme.textSecondary }}>
-            Budget
+            {t.tabs.budget}
           </Text>
           <View className="flex-row gap-2 mb-5">
             {(
@@ -1865,10 +1867,10 @@ export default function BudgetScreen() {
                 </View>
                 <View>
                   <Text className="text-sm font-manrope-bold" style={{ color: theme.text }}>
-                    Regular expense
+                    {t.budget.regularExpense}
                   </Text>
                   <Text className="text-xs" style={{ color: theme.textSecondary }}>
-                    Add this bill automatically
+                    {t.budget.regularExpenseHint}
                   </Text>
                 </View>
               </View>
@@ -1889,7 +1891,7 @@ export default function BudgetScreen() {
             {newBillIsRegular && (
               <View className="mt-4 pt-4" style={{ borderTopWidth: 1, borderTopColor: theme.border }}>
                 <Text className="text-xs font-manrope-bold uppercase mb-2" style={{ color: theme.textSecondary }}>
-                  Repeat
+                  {t.budget.repeat}
                 </Text>
                 <View className="flex-row gap-2 mb-4">
                   {(["daily", "weekly", "monthly"] as const).map((type) => {
@@ -1913,7 +1915,7 @@ export default function BudgetScreen() {
                           className="text-sm font-manrope-semibold capitalize"
                           style={{ color: isActive ? theme.background : theme.text }}
                         >
-                          {type}
+                          {t.tasks.schedule[type]}
                         </Text>
                       </TouchableOpacity>
                     );
@@ -2146,7 +2148,7 @@ export default function BudgetScreen() {
             }}
           >
             <Text className="font-manrope-semibold" style={{ color: theme.text }}>
-              Edit
+              {t.common.edit}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -2262,7 +2264,7 @@ export default function BudgetScreen() {
                       <FileText size={20} color={theme.accent.purple} />
                       <View>
                         <Text className="text-sm font-manrope-semibold" style={{ color: theme.text }}>
-                          Receipt file
+                          {t.budget.receiptFile}
                         </Text>
                         <Text className="text-xs" style={{ color: theme.textSecondary }}>
                           {t.budget.viewReceipt}
@@ -2377,7 +2379,7 @@ export default function BudgetScreen() {
                       }}
                     >
                       <Text className="font-manrope-semibold" style={{ color: theme.text }}>
-                        Edit
+                        {t.common.edit}
                       </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -2421,7 +2423,7 @@ export default function BudgetScreen() {
               }}
             >
               <Text className="font-manrope-semibold" style={{ color: theme.text }}>
-                Edit
+                {t.common.edit}
               </Text>
             </TouchableOpacity>
           )}
@@ -2483,7 +2485,7 @@ export default function BudgetScreen() {
           setShowEditCategoryModal(false);
           setEditingCategory(null);
         }}
-        title="Edit category"
+        title={t.budget.editCategory}
         height="full"
       >
         <View className="flex-1">
@@ -2549,11 +2551,15 @@ export default function BudgetScreen() {
           setShowEditBillModal(false);
           setEditingBillId(null);
         }}
-        title="Edit expense"
+        title={t.budget.editExpense}
         height="full"
       >
         <View className="flex-1">
-          <Input placeholder="Description" value={editBillDescription} onChangeText={setEditBillDescription} />
+          <Input
+            placeholder={t.budget.descriptionPlaceholder}
+            value={editBillDescription}
+            onChangeText={setEditBillDescription}
+          />
           <Input
             placeholder={t.budget.amountPlaceholder}
             value={editBillAmount}

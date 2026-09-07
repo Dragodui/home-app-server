@@ -246,7 +246,7 @@ export default function TasksScreen() {
       await loadTasks();
     } catch (error) {
       console.error("Error editing task:", error);
-      alert(t.common.error, "Failed to update task");
+      alert(t.common.error, t.tasks.failedToUpdate);
     } finally {
       setSavingEditTask(false);
     }
@@ -782,7 +782,7 @@ export default function TasksScreen() {
             }}
           >
             <Text className="font-manrope-semibold" style={{ color: theme.text }}>
-              Open
+              {t.common.open}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -798,7 +798,7 @@ export default function TasksScreen() {
             }}
           >
             <Text className="font-manrope-semibold" style={{ color: theme.text }}>
-              Edit
+              {t.common.edit}
             </Text>
           </TouchableOpacity>
 
@@ -816,7 +816,7 @@ export default function TasksScreen() {
               }}
             >
               <Text className="font-manrope-semibold" style={{ color: theme.text }}>
-                Create schedule
+                {t.tasks.schedule.create}
               </Text>
             </TouchableOpacity>
           )}
@@ -835,7 +835,7 @@ export default function TasksScreen() {
               }}
             >
               <Text className="font-manrope-semibold" style={{ color: theme.text }}>
-                Delete schedule
+                {t.tasks.schedule.deleteAction}
               </Text>
             </TouchableOpacity>
           )}
@@ -863,7 +863,7 @@ export default function TasksScreen() {
           setShowEditTaskModal(false);
           setEditingTaskId(null);
         }}
-        title="Edit task"
+        title={t.tasks.editTask}
         height="full"
       >
         <View className="flex-1">
@@ -920,7 +920,7 @@ export default function TasksScreen() {
                     className="text-sm font-manrope-semibold"
                     style={[{ color: theme.textSecondary }, editTaskRoomId === null && { color: theme.background }]}
                   >
-                    No room
+                    {t.tasks.noRoom}
                   </Text>
                 </TouchableOpacity>
                 {rooms.map((room) => (
@@ -949,7 +949,7 @@ export default function TasksScreen() {
           )}
 
           <Button
-            title="Save"
+            title={t.common.save}
             onPress={handleSaveTaskEdit}
             loading={savingEditTask}
             disabled={!editTaskName.trim() || savingEditTask}

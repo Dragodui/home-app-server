@@ -23,7 +23,7 @@ import Modal from "@/components/ui/modal";
 import { type HAState, type SmartDevice, smarthomeApi } from "@/lib/api";
 import { useResponsiveLayout } from "@/lib/useResponsiveLayout";
 import { useHome } from "@/stores/homeStore";
-import { useI18n } from "@/stores/i18nStore";
+import { interpolate, useI18n } from "@/stores/i18nStore";
 import { useTheme } from "@/stores/themeStore";
 
 export default function SmartHomeDashboard() {
@@ -124,7 +124,7 @@ export default function SmartHomeDashboard() {
       setSelectedRoomId(undefined);
       fetchDevicesAndStatus();
     } catch (err: any) {
-      alert(t.common.error, err.response?.data?.error || "Failed to add device");
+      alert(t.common.error, err.response?.data?.error || t.smartHome.failedToAddDevice);
     } finally {
       setAddingDevice(false);
     }
@@ -143,7 +143,7 @@ export default function SmartHomeDashboard() {
       setEditingDevice(null);
       fetchDevicesAndStatus();
     } catch (_error) {
-      alert(t.common.error, "Failed to update device");
+      alert(t.common.error, t.smartHome.failedToUpdateDevice);
     } finally {
       setSavingEdit(false);
     }
@@ -151,7 +151,7 @@ export default function SmartHomeDashboard() {
 
   const handleDeleteDevice = (deviceId: number, deviceName: string) => {
     if (!home) return;
-    alert("Delete Device", `Are you sure you want to remove ${deviceName}?`, [
+    alert(t.smartHome.deleteDeviceTitle, interpolate(t.smartHome.deleteDeviceConfirm, { name: deviceName }), [
       { text: t.common.cancel, style: "cancel" },
       {
         text: t.common.delete,
@@ -161,7 +161,7 @@ export default function SmartHomeDashboard() {
             await smarthomeApi.deleteDevice(home.id, deviceId);
             fetchDevicesAndStatus();
           } catch (_error) {
-            alert(t.common.error, "Failed to delete device");
+            alert(t.common.error, t.smartHome.failedToDeleteDevice);
           }
         },
       },
@@ -203,7 +203,7 @@ export default function SmartHomeDashboard() {
     const state = deviceStates[item.entityId];
     const isOn = state?.state === "on";
     const isOffline = state?.state === "unavailable" || state?.state === "unknown";
-    const roomName = rooms.find((r) => r.id === item.roomId)?.name || "No Room";
+    const roomName = rooms.find((r) => r.id === item.roomId)?.name || t.smartHome.noRoomAssigned;
 
     return (
       <View
@@ -219,7 +219,7 @@ export default function SmartHomeDashboard() {
           </Text>
           <View className="flex-row items-center">
             <Text className="text-xs font-manrope mr-2" style={{ color: theme.textSecondary }}>
-              {state?.state || "Unknown"}
+              {state?.state || t.smartHome.unknownState}
             </Text>
             <Text
               className="text-xs font-manrope-semibold px-1.5 py-0.5 rounded-md bg-black/5"
@@ -288,7 +288,7 @@ export default function SmartHomeDashboard() {
           <ArrowLeft size={24} color={theme.text} />
         </TouchableOpacity>
         <Text className="text-2xl font-manrope-bold" style={{ color: theme.text }}>
-          Smart Home
+          {t.smartHome.title}
         </Text>
         <View className="w-12" />
       </View>
@@ -315,7 +315,7 @@ export default function SmartHomeDashboard() {
                 className="font-manrope-bold"
                 style={{ color: haStatus.connected ? theme.accent.cyan : theme.accent.danger }}
               >
-                {haStatus.connected ? "Connected" : "Disconnected"}
+                {haStatus.connected ? t.smartHome.connectedStatus : t.smartHome.disconnectedStatus}
               </Text>
               {haStatus.url && (
                 <Text className="text-xs" style={{ color: theme.textSecondary }}>
@@ -339,7 +339,7 @@ export default function SmartHomeDashboard() {
       >
         <View className="flex-row justify-between items-center mb-4">
           <Text className="text-lg font-manrope-bold" style={{ color: theme.text }}>
-            All Devices
+            {t.smartHome.allDevices}
           </Text>
           <TouchableOpacity onPress={fetchDevicesAndStatus} disabled={loading}>
             {loading ? (
@@ -352,18 +352,18 @@ export default function SmartHomeDashboard() {
 
         {devices.length === 0 ? (
           <View className="items-center mt-10">
-            <Text style={{ color: theme.textSecondary }}>No devices added yet</Text>
+            <Text style={{ color: theme.textSecondary }}>{t.smartHome.noDevicesYet}</Text>
             {isAdmin &&
               (!haStatus?.connected ? (
                 <Button
-                  title="Connect Home Assistant"
+                  title={t.smartHome.connectHomeAssistant}
                   onPress={() => router.push("/settings")}
                   variant="primary"
                   style={{ marginTop: 20 }}
                 />
               ) : (
                 <Button
-                  title="Add Device"
+                  title={t.smartHome.addDevice}
                   onPress={() => {
                     setShowAddModal(true);
                     handleDiscover();
@@ -387,23 +387,23 @@ export default function SmartHomeDashboard() {
       </View>
 
       {/* Add Device Modal */}
-      <Modal visible={showAddModal} onClose={() => setShowAddModal(false)} title="Add Device" height="full">
+      <Modal visible={showAddModal} onClose={() => setShowAddModal(false)} title={t.smartHome.addDevice} height="full">
         <View className="flex-1">
           {selectedEntity ? (
             <View>
               <TouchableOpacity onPress={() => setSelectedEntity(null)} className="mb-4">
-                <Text style={{ color: theme.accent.cyan }}>Back to list</Text>
+                <Text style={{ color: theme.accent.cyan }}>{t.smartHome.backToList}</Text>
               </TouchableOpacity>
 
               <Input
-                label="Device Name"
+                label={t.smartHome.deviceNameLabel}
                 value={newDeviceName}
                 onChangeText={setNewDeviceName}
-                placeholder="e.g. Living Room Light"
+                placeholder={t.smartHome.deviceNamePlaceholder}
               />
 
               <Text className="mb-2 font-manrope-medium" style={{ color: theme.text }}>
-                Assign Room (Optional)
+                {t.smartHome.assignRoomOptional}
               </Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-6">
                 <TouchableOpacity
@@ -411,7 +411,9 @@ export default function SmartHomeDashboard() {
                   style={{ backgroundColor: selectedRoomId === undefined ? theme.text : theme.surface }}
                   onPress={() => setSelectedRoomId(undefined)}
                 >
-                  <Text style={{ color: selectedRoomId === undefined ? theme.background : theme.text }}>None</Text>
+                  <Text style={{ color: selectedRoomId === undefined ? theme.background : theme.text }}>
+                    {t.common.none}
+                  </Text>
                 </TouchableOpacity>
                 {rooms.map((room) => (
                   <TouchableOpacity
@@ -441,13 +443,13 @@ export default function SmartHomeDashboard() {
           ) : (
             <>
               <Text className="mb-4" style={{ color: theme.textSecondary }}>
-                Select a device to add
+                {t.smartHome.selectDeviceToAdd}
               </Text>
               {discovering ? (
                 <ActivityIndicator color={theme.accent.cyan} />
               ) : discoveredDevices.length === 0 ? (
                 <View className="items-center py-5">
-                  <Text style={{ color: theme.textSecondary }}>No new devices found</Text>
+                  <Text style={{ color: theme.textSecondary }}>{t.smartHome.noNewDevicesFound}</Text>
                 </View>
               ) : (
                 <FlatList
@@ -478,12 +480,12 @@ export default function SmartHomeDashboard() {
       </Modal>
 
       {/* Edit Device Modal */}
-      <Modal visible={showEditModal} onClose={() => setShowEditModal(false)} title="Edit Device">
+      <Modal visible={showEditModal} onClose={() => setShowEditModal(false)} title={t.smartHome.editDevice}>
         <View>
-          <Input label="Device Name" value={editName} onChangeText={setEditName} />
+          <Input label={t.smartHome.deviceNameLabel} value={editName} onChangeText={setEditName} />
 
           <Text className="mb-2 font-manrope-medium" style={{ color: theme.text }}>
-            Room
+            {t.smartHome.roomLabel}
           </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-6">
             <TouchableOpacity
@@ -491,7 +493,7 @@ export default function SmartHomeDashboard() {
               style={{ backgroundColor: editRoomId === undefined ? theme.text : theme.surface }}
               onPress={() => setEditRoomId(undefined)}
             >
-              <Text style={{ color: editRoomId === undefined ? theme.background : theme.text }}>None</Text>
+              <Text style={{ color: editRoomId === undefined ? theme.background : theme.text }}>{t.common.none}</Text>
             </TouchableOpacity>
             {rooms.map((room) => (
               <TouchableOpacity

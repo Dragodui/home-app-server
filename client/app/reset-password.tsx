@@ -7,6 +7,7 @@ import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import { useResponsiveLayout } from "@/lib/useResponsiveLayout";
 import { useAuth } from "@/stores/authStore";
+import { useI18n } from "@/stores/i18nStore";
 import { useTheme } from "@/stores/themeStore";
 
 export default function ResetPasswordScreen() {
@@ -14,6 +15,7 @@ export default function ResetPasswordScreen() {
   const insets = useSafeAreaInsets();
   const { resetPassword } = useAuth();
   const { theme } = useTheme();
+  const { t } = useI18n();
   const { token } = useLocalSearchParams<{ token: string }>();
   const { horizontalPadding } = useResponsiveLayout();
 
@@ -25,31 +27,31 @@ export default function ResetPasswordScreen() {
 
   useEffect(() => {
     if (!token) {
-      setError("Invalid or missing reset token");
+      setError(t.auth.invalidResetToken);
     }
-  }, [token]);
+  }, [token, t]);
 
   const handleSubmit = async () => {
     setError("");
 
     // Validation
     if (!password || !confirmPassword) {
-      setError("Please fill in all fields");
+      setError(t.auth.fillAllFields);
       return;
     }
 
     if (password.length < 8) {
-      setError("Password must be at least 8 characters");
+      setError(t.auth.passwordMinLength8);
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError(t.security.passwordsMismatch);
       return;
     }
 
     if (!token) {
-      setError("Invalid reset token");
+      setError(t.auth.invalidResetToken);
       return;
     }
 
@@ -61,7 +63,7 @@ export default function ResetPasswordScreen() {
     if (result.success) {
       setSuccess(true);
     } else {
-      setError(result.error || "Failed to reset password");
+      setError(result.error || t.auth.failedToResetPassword);
     }
   };
 
@@ -79,12 +81,17 @@ export default function ResetPasswordScreen() {
             <CheckCircle size={64} color={theme.accent.green} />
           </View>
           <Text className="text-[28px] font-manrope-bold mb-4 text-center" style={{ color: theme.text }}>
-            Password Reset!
+            {t.auth.passwordResetTitle}
           </Text>
           <Text className="text-base font-manrope text-center leading-6 mb-8" style={{ color: theme.textSecondary }}>
-            Your password has been reset successfully.{"\n"}You can now log in with your new password.
+            {t.auth.passwordResetSuccessText}
           </Text>
-          <Button title="Go to Login" onPress={() => router.replace("/login")} variant="purple" className="w-full" />
+          <Button
+            title={t.auth.goToLogin}
+            onPress={() => router.replace("/login")}
+            variant="purple"
+            className="w-full"
+          />
         </View>
       </View>
     );
@@ -124,17 +131,17 @@ export default function ResetPasswordScreen() {
             <Lock size={40} color={theme.background} />
           </View>
           <Text className="text-[32px] font-manrope-bold mb-3" style={{ color: theme.text }}>
-            Reset Password
+            {t.auth.resetPasswordTitle}
           </Text>
           <Text className="text-base font-manrope leading-6" style={{ color: theme.textSecondary }}>
-            Enter your new password below.
+            {t.auth.resetPasswordDescription}
           </Text>
         </View>
 
         <View className="flex-1">
           <Input
-            label="New Password"
-            placeholder="Enter new password"
+            label={t.security.newPassword}
+            placeholder={t.security.newPasswordPlaceholder}
             value={password}
             onChangeText={(text) => {
               setPassword(text);
@@ -146,8 +153,8 @@ export default function ResetPasswordScreen() {
           />
 
           <Input
-            label="Confirm Password"
-            placeholder="Re-enter new password"
+            label={t.security.confirmPassword}
+            placeholder={t.security.confirmPasswordPlaceholder}
             value={confirmPassword}
             onChangeText={(text) => {
               setConfirmPassword(text);
@@ -159,7 +166,7 @@ export default function ResetPasswordScreen() {
           />
 
           <Button
-            title="Reset Password"
+            title={t.auth.resetPasswordTitle}
             onPress={handleSubmit}
             loading={isLoading}
             disabled={isLoading || !password || !confirmPassword || !token}
@@ -170,11 +177,11 @@ export default function ResetPasswordScreen() {
 
         <View className="flex-row justify-center items-center pt-6" style={{ paddingBottom: insets.bottom + 24 }}>
           <Text className="text-sm font-manrope" style={{ color: theme.textSecondary }}>
-            Remember your password?{" "}
+            {t.auth.rememberYourPassword}{" "}
           </Text>
           <TouchableOpacity onPress={() => router.replace("/login")}>
             <Text className="text-sm font-manrope-bold underline" style={{ color: theme.text }}>
-              Sign In
+              {t.auth.logIn}
             </Text>
           </TouchableOpacity>
         </View>

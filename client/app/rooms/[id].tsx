@@ -12,7 +12,7 @@ import { smarthomeApi, taskApi } from "@/lib/api";
 import type { HAState, SmartDevice, Task } from "@/lib/types";
 import { useResponsiveLayout } from "@/lib/useResponsiveLayout";
 import { useHome } from "@/stores/homeStore";
-import { useI18n } from "@/stores/i18nStore";
+import { interpolate, useI18n } from "@/stores/i18nStore";
 import { useTheme } from "@/stores/themeStore";
 
 export default function RoomDetailScreen() {
@@ -80,7 +80,7 @@ export default function RoomDetailScreen() {
       const results = await smarthomeApi.discover(home.id);
       setDiscoveredDevices(results);
     } catch (_error) {
-      alert(t.common.error, "Failed to discover devices");
+      alert(t.common.error, t.smartHome.failedToDiscoverDevices);
     } finally {
       setDiscovering(false);
     }
@@ -101,7 +101,7 @@ export default function RoomDetailScreen() {
       setSelectedEntity(null);
       fetchDashboardData();
     } catch (err: any) {
-      alert(t.common.error, err.response?.data?.error || "Failed to add device");
+      alert(t.common.error, err.response?.data?.error || t.smartHome.failedToAddDevice);
     } finally {
       setAddingDevice(false);
     }
@@ -109,7 +109,7 @@ export default function RoomDetailScreen() {
 
   const handleDeleteDevice = (deviceId: number, deviceName: string) => {
     if (!home) return;
-    alert("Delete Device", `Are you sure you want to remove ${deviceName}?`, [
+    alert(t.smartHome.deleteDeviceTitle, interpolate(t.smartHome.deleteDeviceConfirm, { name: deviceName }), [
       { text: t.common.cancel, style: "cancel" },
       {
         text: t.common.delete,
@@ -119,7 +119,7 @@ export default function RoomDetailScreen() {
             await smarthomeApi.deleteDevice(home.id, deviceId);
             fetchDashboardData();
           } catch (_error) {
-            alert(t.common.error, "Failed to delete device");
+            alert(t.common.error, t.smartHome.failedToDeleteDevice);
           }
         },
       },
@@ -240,7 +240,7 @@ export default function RoomDetailScreen() {
             {item.name}
           </Text>
           <Text className="text-xs font-manrope" style={{ color: theme.textSecondary }}>
-            {state?.state || "Unknown"}
+            {state?.state || t.smartHome.unknownState}
           </Text>
         </View>
 
@@ -318,7 +318,7 @@ export default function RoomDetailScreen() {
             <View className="flex-row gap-3 mb-5">
               <View className="flex-1 rounded-20 p-4" style={{ backgroundColor: theme.surface }}>
                 <Text className="text-xs font-manrope-bold uppercase" style={{ color: theme.textSecondary }}>
-                  Tasks
+                  {t.tasks.title}
                 </Text>
                 <Text className="text-2xl font-manrope-bold mt-1" style={{ color: theme.text }}>
                   {tasks.length}
@@ -326,7 +326,7 @@ export default function RoomDetailScreen() {
               </View>
               <View className="flex-1 rounded-20 p-4" style={{ backgroundColor: theme.surface }}>
                 <Text className="text-xs font-manrope-bold uppercase" style={{ color: theme.textSecondary }}>
-                  Pending
+                  {t.common.pending}
                 </Text>
                 <Text className="text-2xl font-manrope-bold mt-1" style={{ color: theme.accent.pink }}>
                   {taskStats.pending}
@@ -334,7 +334,7 @@ export default function RoomDetailScreen() {
               </View>
               <View className="flex-1 rounded-20 p-4" style={{ backgroundColor: theme.surface }}>
                 <Text className="text-xs font-manrope-bold uppercase" style={{ color: theme.textSecondary }}>
-                  Devices
+                  {t.smartHome.allDevices}
                 </Text>
                 <Text className="text-2xl font-manrope-bold mt-1" style={{ color: theme.accent.cyan }}>
                   {devices.length}
@@ -346,7 +346,7 @@ export default function RoomDetailScreen() {
               <View className="mb-6" style={{ flex: isDesktop ? 1 : undefined, width: "100%" }}>
                 <View className="flex-row items-center justify-between mb-3">
                   <Text className="text-lg font-manrope-bold" style={{ color: theme.text }}>
-                    Room Tasks
+                    {t.rooms.roomTasks}
                   </Text>
                   <View className="flex-row items-center gap-2">
                     <TouchableOpacity
@@ -425,7 +425,7 @@ export default function RoomDetailScreen() {
                                 style={{ backgroundColor: theme.accent.pinkLight }}
                               >
                                 <Text className="text-xs font-manrope-bold" style={{ color: theme.accent.pink }}>
-                                  Active
+                                  {t.tasks.schedule.active}
                                 </Text>
                               </View>
                             )}
@@ -439,11 +439,11 @@ export default function RoomDetailScreen() {
 
               <View className="mb-4" style={{ flex: isDesktop ? 1 : undefined, width: "100%" }}>
                 <Text className="text-lg font-manrope-bold mb-3" style={{ color: theme.text }}>
-                  Devices
+                  {t.smartHome.allDevices}
                 </Text>
                 {devices.length === 0 ? (
                   <View className="rounded-20 p-4" style={{ backgroundColor: theme.surface }}>
-                    <Text style={{ color: theme.textSecondary }}>No devices in this room</Text>
+                    <Text style={{ color: theme.textSecondary }}>{t.smartHome.noDevicesInRoom}</Text>
                   </View>
                 ) : (
                   devices.map((device) => <View key={device.id}>{renderDevice({ item: device })}</View>)
@@ -527,18 +527,18 @@ export default function RoomDetailScreen() {
       </Modal>
 
       {/* Add Device Modal */}
-      <Modal visible={showAddModal} onClose={() => setShowAddModal(false)} title="Add Device" height="full">
+      <Modal visible={showAddModal} onClose={() => setShowAddModal(false)} title={t.smartHome.addDevice} height="full">
         <View className="flex-1">
           {selectedEntity ? (
             <View>
               <TouchableOpacity onPress={() => setSelectedEntity(null)} className="mb-4">
-                <Text style={{ color: theme.accent.cyan }}>Back to list</Text>
+                <Text style={{ color: theme.accent.cyan }}>{t.smartHome.backToList}</Text>
               </TouchableOpacity>
               <Input
-                label="Device Name"
+                label={t.smartHome.deviceNameLabel}
                 value={deviceName}
                 onChangeText={setDeviceName}
-                placeholder="e.g. Ceiling Light"
+                placeholder={t.smartHome.roomDeviceNamePlaceholder}
               />
               <Text className="mb-2" style={{ color: theme.textSecondary }}>
                 Entity: {selectedEntity}

@@ -34,7 +34,7 @@ interface HomeState {
   deleteHome: () => Promise<HomeResult>;
   removeMember: (userId: number) => Promise<HomeResult>;
   regenerateInviteCode: () => Promise<HomeResult>;
-  updateHomeCurrency: (currency: string) => Promise<HomeResult>;
+  updateHome: (fields: { name?: string; currency?: string }) => Promise<HomeResult>;
   createRoom: (name: string, icon?: string, color?: string) => Promise<HomeResult>;
   deleteRoom: (roomId: number) => Promise<HomeResult>;
   refreshRooms: () => Promise<void>;
@@ -293,20 +293,21 @@ export const useHomeStore = create<HomeState>((set, get) => {
       }
     },
 
-    updateHomeCurrency: async (currency: string): Promise<HomeResult> => {
+    // Patches name and/or currency in one call - pass only the fields that changed.
+    updateHome: async (fields: { name?: string; currency?: string }): Promise<HomeResult> => {
       const { home } = get();
       if (!home) return { success: false, error: "No home found" };
 
       try {
-        await homeApi.updateCurrency(home.id, currency);
+        await homeApi.update(home.id, fields);
         set((state) => ({
-          home: state.home ? { ...state.home, currency } : state.home,
-          homes: state.homes.map((h) => (h.id === home.id ? { ...h, currency } : h)),
+          home: state.home ? { ...state.home, ...fields } : state.home,
+          homes: state.homes.map((h) => (h.id === home.id ? { ...h, ...fields } : h)),
         }));
         return { success: true };
       } catch (error: any) {
-        console.error("Error updating home currency:", error);
-        return { success: false, error: getApiErrorMessage(error, "Failed to update currency") };
+        console.error("Error updating home:", error);
+        return { success: false, error: getApiErrorMessage(error, "Failed to update home") };
       }
     },
 

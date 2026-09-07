@@ -185,6 +185,7 @@ func SetupRoutes(deps RoutesDeps) http.Handler {
 					r.Route("/{home_id}", func(r chi.Router) {
 						r.With(middleware.RequireMember(homeRepo)).Get("/", homeHandler.GetByID)
 						r.With(middleware.RequireAdmin(homeRepo)).Delete("/", homeHandler.Delete)
+						r.With(middleware.RequireAdmin(homeRepo)).Patch("/", homeHandler.UpdateHome)
 						r.With(middleware.RequireMember(homeRepo)).Post("/leave", homeHandler.Leave)
 						r.With(middleware.RequireMember(homeRepo)).Get("/members", homeHandler.GetMembers)
 						r.With(middleware.RequireAdmin(homeRepo)).Delete("/members/{user_id}", homeHandler.RemoveMember)
@@ -192,7 +193,6 @@ func SetupRoutes(deps RoutesDeps) http.Handler {
 						r.With(middleware.RequireAdmin(homeRepo)).Post("/members/{user_id}/approve", homeHandler.ApproveMember)
 						r.With(middleware.RequireAdmin(homeRepo)).Post("/members/{user_id}/reject", homeHandler.RejectMember)
 						r.With(middleware.RequireAdmin(homeRepo)).Patch("/members/{user_id}/role", homeHandler.UpdateMemberRole)
-						r.With(middleware.RequireAdmin(homeRepo)).Patch("/currency", homeHandler.UpdateCurrency)
 						r.With(middleware.RequireAdmin(homeRepo)).Post("/regenerate_code", homeHandler.RegenerateInviteCode)
 						r.With(middleware.RequireAdmin(homeRepo)).Get("/audit", auditHandler.GetByHomeID)
 

@@ -308,6 +308,7 @@ export default {
     selectLanguage: "Wybierz język",
     homeSettings: "USTAWIENIA DOMU",
     homeName: "Nazwa domu",
+    currency: "WALUTA",
     yourRole: "Twoja rola",
     deleteHome: "Usuń dom",
     leaveHome: "Opuść dom",

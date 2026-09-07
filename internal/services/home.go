@@ -35,8 +35,8 @@ type IHomeService interface {
 	RejectMember(ctx context.Context, homeID int, userID int) error
 	GetPendingMembers(ctx context.Context, homeID int) ([]models.HomeMembership, error)
 	UpdateMemberRole(ctx context.Context, homeID int, userID int, role string) error
-	UpdateCurrency(ctx context.Context, homeID int, currency string) error
 	GetHomeCurrency(ctx context.Context, homeID int) (string, error)
+	UpdateHome(ctx context.Context, homeID int, req models.UpdateHomeRequest) error
 }
 
 func NewHomeService(repo repository.HomeRepository, cache *redis.Client, notifSvc INotificationService) *HomeService {
@@ -395,23 +395,47 @@ func (s *HomeService) UpdateMemberRole(ctx context.Context, homeID int, userID i
 	return nil
 }
 
-func (s *HomeService) UpdateCurrency(ctx context.Context, homeID int, currency string) error {
-	normalizedCurrency := strings.ToUpper(strings.TrimSpace(currency))
-	if normalizedCurrency == "" {
-		return errors.New("currency is required")
+// UpdateHome patches a home's name and/or currency in a single call - whichever
+// fields are set on req. At least one of Name/Currency must be provided.
+func (s *HomeService) UpdateHome(ctx context.Context, homeID int, req models.UpdateHomeRequest) error {
+	if req.Name == nil && req.Currency == nil {
+		return errors.New("at least one field (name or currency) is required")
 	}
 
-	if err := s.repo.UpdateCurrency(ctx, homeID, normalizedCurrency); err != nil {
+	fields := map[string]interface{}{}
+	eventData := map[string]interface{}{"homeID": homeID}
+
+	if req.Name != nil {
+		normalizedName := strings.TrimSpace(*req.Name)
+		if normalizedName == "" {
+			return errors.New("name is required")
+		}
+		fields["name"] = normalizedName
+		eventData["name"] = normalizedName
+	}
+
+	if req.Currency != nil {
+		normalizedCurrency := strings.ToUpper(strings.TrimSpace(*req.Currency))
+		if normalizedCurrency == "" {
+			return errors.New("currency is required")
+		}
+		fields["currency"] = normalizedCurrency
+		eventData["currency"] = normalizedCurrency
+	}
+
+	if err := s.repo.Update(ctx, homeID, fields); err != nil {
 		return err
 	}
 
 	homeKey := utils.GetHomeCacheKey(homeID)
-	currencyKey := utils.GetHomeCurrencyKey(homeID)
-	if err := utils.DeleteFromCache(ctx, currencyKey, s.cache); err != nil {
-		logger.Info.Printf("Failed to delete redis cache for key %s: %v", homeKey, err)
-	}
 	if err := utils.DeleteFromCache(ctx, homeKey, s.cache); err != nil {
 		logger.Info.Printf("Failed to delete redis cache for key %s: %v", homeKey, err)
+	}
+	if _, ok := fields["currency"]; ok {
+		currencyKey := utils.GetHomeCurrencyKey(homeID)
+		if err := utils.DeleteFromCache(ctx, currencyKey, s.cache); err != nil {
+			logger.Info.Printf("Failed to delete redis cache for key %s: %v", currencyKey, err)
+		}
 	}
 
 	members, err := s.repo.GetMembers(ctx, homeID)
@@ -428,12 +452,12 @@ func (s *HomeService) UpdateCurrency(ctx context.Context, homeID int, currency s
 		}
 	}
 
-	metrics.HomeOperationsTotal.WithLabelValues("update_currency").Inc()
+	metrics.HomeOperationsTotal.WithLabelValues("update_home").Inc()
 
 	event.SendHomeEvent(ctx, s.cache, homeID, &event.RealTimeEvent{
 		Module: event.ModuleHome,
 		Action: event.ActionUpdated,
-		Data:   map[string]interface{}{"homeID": homeID, "currency": normalizedCurrency},
+		Data:   eventData,
 	})
 
 	return nil

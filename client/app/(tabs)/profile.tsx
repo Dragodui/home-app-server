@@ -6,6 +6,7 @@ import {
   Check,
   ChevronRight,
   Copy,
+  DoorOpen,
   Home as HomeIcon,
   LogOut,
   Plus,
@@ -187,6 +188,12 @@ export default function ProfileScreen() {
     {
       icon: HomeIcon,
       label: t.profile.homeSettings,
+      color: theme.accent.yellow,
+      onPress: () => router.push("/home-settings"),
+    },
+    {
+      icon: DoorOpen,
+      label: t.rooms.title,
       color: theme.accent.yellow,
       onPress: () => router.push("/rooms"),
     },

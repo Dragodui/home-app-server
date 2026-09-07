@@ -22,7 +22,7 @@ const (
 	AuditEventMemberApproved   = "home.member_approved"
 	AuditEventMemberRejected   = "home.member_rejected"
 	AuditEventRoleUpdated      = "home.role_updated"
-	AuditEventCurrencyUpdated  = "home.currency_updated"
+	AuditEventHomeUpdated      = "home.updated"
 )
 
 type AuditRecord struct {

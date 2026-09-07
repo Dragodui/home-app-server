@@ -31,8 +31,9 @@ type HomeRepository interface {
 	GetUserHome(ctx context.Context, userID int) (*models.Home, error)
 	GetUserHomes(ctx context.Context, userID int) ([]models.Home, error)
 	UpdateMemberRole(ctx context.Context, homeID int, userID int, role string) error
-	UpdateCurrency(ctx context.Context, homeID int, currency string) error
 	GetCurrency(ctx context.Context, homeID int) (string, error)
+	// Update patches the given fields of a home (only non-nil keys are written).
+	Update(ctx context.Context, homeID int, fields map[string]interface{}) error
 }
 
 type homeRepo struct {
@@ -294,10 +295,13 @@ func (r *homeRepo) UpdateMemberRole(ctx context.Context, homeID int, userID int,
 	return nil
 }
 
-func (r *homeRepo) UpdateCurrency(ctx context.Context, homeID int, currency string) error {
+func (r *homeRepo) Update(ctx context.Context, homeID int, fields map[string]interface{}) error {
+	if len(fields) == 0 {
+		return nil
+	}
 	result := r.db.WithContext(ctx).Model(&models.Home{}).
 		Where("id = ?", homeID).
-		Update("currency", currency)
+		Updates(fields)
 	if result.Error != nil {
 		return result.Error
 	}

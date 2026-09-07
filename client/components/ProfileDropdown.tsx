@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { Bell, ChartColumn, DoorOpen, Notebook, Settings, Tv, User, Users, Wifi } from "lucide-react-native";
+import { Bell, ChartColumn, DoorOpen, Home as HomeIcon, Notebook, Settings, Tv, User, Users, Wifi } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Animated, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useAuth } from "@/stores/authStore";
@@ -118,6 +118,7 @@ export default function ProfileDropdown() {
     { icon: Notebook, label: t.tabs.notes || "Notes", path: "/(tabs)/notes" },
     { icon: ChartColumn, label: t.tabs.polls || "Polls", path: "/(tabs)/polls" },
     { icon: DoorOpen, label: t.rooms.title || "Rooms", path: "/rooms" },
+    { icon: HomeIcon, label: t.profile.homeSettings, path: "/home-settings" },
     { icon: Settings, label: "Settings", path: "/settings" },
     { icon: Users, label: "Members", path: "/members" },
     { icon: Wifi, label: "Smart Home", path: "/smarthome" },

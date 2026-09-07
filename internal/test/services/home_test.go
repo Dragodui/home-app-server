@@ -171,7 +171,7 @@ func (m *mockHomeRepo) UpdateMemberRole(ctx context.Context, homeID int, userID 
 	return nil
 }
 
-func (m *mockHomeRepo) UpdateCurrency(ctx context.Context, homeID int, currency string) error {
+func (m *mockHomeRepo) Update(ctx context.Context, homeID int, fields map[string]interface{}) error {
 	return nil
 }
 

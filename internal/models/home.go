@@ -19,6 +19,10 @@ type CreateHomeRequest struct {
 	Name string `json:"name" validate:"required,min=3"`
 }
 
-type UpdateHomeCurrencyRequest struct {
-	Currency string `json:"currency" validate:"required,oneof=USD EUR GBP PLN UAH BYN"`
+// UpdateHomeRequest carries the fields of a home that can be patched in one call.
+// Both fields are optional so a caller can update just the name, just the
+// currency, or both in a single request; at least one must be set.
+type UpdateHomeRequest struct {
+	Name     *string `json:"name,omitempty" validate:"omitempty,min=3,max=64"`
+	Currency *string `json:"currency,omitempty" validate:"omitempty,oneof=USD EUR GBP PLN UAH BYN"`
 }

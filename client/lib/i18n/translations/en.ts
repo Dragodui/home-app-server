@@ -307,6 +307,7 @@ export default {
     selectLanguage: "Select Language",
     homeSettings: "HOME SETTINGS",
     homeName: "Home Name",
+    currency: "CURRENCY",
     yourRole: "Your Role",
     deleteHome: "Delete Home",
     leaveHome: "Leave Home",

@@ -83,7 +83,7 @@ func (m *mockHomeRepo) UpdateMemberRole(ctx context.Context, homeID int, userID 
 	return nil
 }
 
-func (m *mockHomeRepo) UpdateCurrency(ctx context.Context, homeID int, currency string) error {
+func (m *mockHomeRepo) Update(ctx context.Context, homeID int, fields map[string]interface{}) error {
 	return nil
 }
 
@@ -157,12 +157,12 @@ func (m *mockHomeService) UpdateMemberRole(ctx context.Context, homeID int, user
 	return nil
 }
 
-func (m *mockHomeService) UpdateCurrency(ctx context.Context, homeID int, currency string) error {
-	return nil
-}
-
 func (m *mockHomeService) GetHomeCurrency(ctx context.Context, homeID int) (string, error) {
 	return "", nil
+}
+
+func (m *mockHomeService) UpdateHome(ctx context.Context, homeID int, req models.UpdateHomeRequest) error {
+	return nil
 }
 
 // Test fixtures

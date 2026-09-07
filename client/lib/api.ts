@@ -369,10 +369,9 @@ export const homeApi = {
     return { message: response.data.message };
   },
 
-  updateCurrency: async (homeId: number, currency: string): Promise<{ message: string }> => {
-    const response = await api.patch<{ status: boolean; message: string }>(`/homes/${homeId}/currency`, {
-      currency,
-    });
+  // Patches name and/or currency in one call - pass only the fields that changed.
+  update: async (homeId: number, fields: { name?: string; currency?: string }): Promise<{ message: string }> => {
+    const response = await api.patch<{ status: boolean; message: string }>(`/homes/${homeId}`, fields);
     return { message: response.data.message };
   },
 };

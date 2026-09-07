@@ -525,20 +525,20 @@ func (h *HomeHandler) UpdateMemberRole(w http.ResponseWriter, r *http.Request) {
 	utils.JSON(w, http.StatusOK, map[string]interface{}{"status": true, "message": "Role updated successfully"})
 }
 
-// UpdateCurrency godoc
-// @Summary      Update home currency
-// @Description  Update home currency (admin only)
+// UpdateHome godoc
+// @Summary      Update home
+// @Description  Update a home's name and/or currency in one call (admin only); send whichever fields are changing
 // @Tags         home
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
 // @Param        home_id path int true "Home ID"
-// @Param        input body models.UpdateHomeCurrencyRequest true "Update Home Currency Request"
+// @Param        input body models.UpdateHomeRequest true "Update Home Request"
 // @Success      200  {object}  map[string]interface{}
 // @Failure      400  {object}  map[string]interface{}
 // @Failure      403  {object}  map[string]interface{}
-// @Router       /homes/{home_id}/currency [patch]
-func (h *HomeHandler) UpdateCurrency(w http.ResponseWriter, r *http.Request) {
+// @Router       /homes/{home_id} [patch]
+func (h *HomeHandler) UpdateHome(w http.ResponseWriter, r *http.Request) {
 	homeIDStr := chi.URLParam(r, "home_id")
 	homeID, err := strconv.Atoi(homeIDStr)
 	if err != nil {
@@ -546,7 +546,7 @@ func (h *HomeHandler) UpdateCurrency(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req models.UpdateHomeCurrencyRequest
+	var req models.UpdateHomeRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		utils.JSONError(w, "Invalid JSON", http.StatusBadRequest)
 		return
@@ -557,14 +557,21 @@ func (h *HomeHandler) UpdateCurrency(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.svc.UpdateCurrency(r.Context(), homeID, req.Currency); err != nil {
-		utils.SafeError(w, err, "Error updating home currency", http.StatusBadRequest)
+	if err := h.svc.UpdateHome(r.Context(), homeID, req); err != nil {
+		utils.SafeError(w, err, "Error updating home", http.StatusBadRequest)
 		return
 	}
 
-	h.recordAudit(r, services.AuditEventCurrencyUpdated, homeID, "home", &homeID, map[string]any{"currency": req.Currency})
+	auditData := map[string]any{}
+	if req.Name != nil {
+		auditData["name"] = *req.Name
+	}
+	if req.Currency != nil {
+		auditData["currency"] = *req.Currency
+	}
+	h.recordAudit(r, services.AuditEventHomeUpdated, homeID, "home", &homeID, auditData)
 
-	utils.JSON(w, http.StatusOK, map[string]interface{}{"status": true, "message": "Currency updated successfully"})
+	utils.JSON(w, http.StatusOK, map[string]interface{}{"status": true, "message": "Home updated successfully"})
 }
 
 func (h *HomeHandler) recordAudit(r *http.Request, eventType string, homeID int, entityType string, entityID *int, metadata map[string]any) {

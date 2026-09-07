@@ -308,6 +308,7 @@ export default {
     selectLanguage: "Sélectionner la langue",
     homeSettings: "PARAMÈTRES DU FOYER",
     homeName: "Nom du foyer",
+    currency: "DEVISE",
     yourRole: "Votre rôle",
     deleteHome: "Supprimer le foyer",
     leaveHome: "Quitter le foyer",

@@ -399,6 +399,8 @@ export default {
     usernameInvalid: "3-32 caractères, commence par une lettre, uniquement a-z, 0-9, _",
     homeCode: "Code du foyer",
     inviteCodeCopied: "Code d'invitation copié dans le presse-papiers",
+    rotate: "Régénérer",
+    rotateCodeConfirm: "Générer un nouveau code d'invitation ? L'ancien cessera de fonctionner.",
     homeSettings: "Paramètres du foyer",
     settings: "Paramètres",
     notifications: "Notifications",

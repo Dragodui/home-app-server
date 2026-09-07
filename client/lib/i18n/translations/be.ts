@@ -398,6 +398,8 @@ export default {
     usernameInvalid: "3-32 сімвалы, пачынаецца з літары, толькі a-z, 0-9, _",
     homeCode: "Код дома",
     inviteCodeCopied: "Код запрашэння скапіяваны ў буфер абмену",
+    rotate: "Абнавіць",
+    rotateCodeConfirm: "Стварыць новы код запрашэння? Стары код перастане працаваць.",
     homeSettings: "Налады дома",
     settings: "Налады",
     notifications: "Апавяшчэнні",

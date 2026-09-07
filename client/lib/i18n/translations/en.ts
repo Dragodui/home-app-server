@@ -397,6 +397,8 @@ export default {
     usernameInvalid: "3-32 chars, starts with letter, only a-z, 0-9, _",
     homeCode: "Home Code",
     inviteCodeCopied: "Invite code copied to clipboard",
+    rotate: "Rotate",
+    rotateCodeConfirm: "Generate a new invite code? The old one will stop working.",
     homeSettings: "Home Settings",
     settings: "Settings",
     notifications: "Notifications",

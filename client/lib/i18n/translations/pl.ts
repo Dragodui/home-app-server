@@ -398,6 +398,8 @@ export default {
     usernameInvalid: "3-32 znaki, zaczyna się od litery, tylko a-z, 0-9, _",
     homeCode: "Kod domu",
     inviteCodeCopied: "Kod zaproszenia skopiowany do schowka",
+    rotate: "Wygeneruj ponownie",
+    rotateCodeConfirm: "Wygenerować nowy kod zaproszenia? Stary kod przestanie działać.",
     homeSettings: "Ustawienia domu",
     settings: "Ustawienia",
     notifications: "Powiadomienia",

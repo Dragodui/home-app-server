@@ -1,5 +1,6 @@
+import * as Clipboard from "expo-clipboard";
 import { useRouter } from "expo-router";
-import { ArrowLeft, Check, ChevronRight, DoorOpen, Pencil, Users } from "lucide-react-native";
+import { ArrowLeft, Check, ChevronRight, Copy, DoorOpen, Pencil, RotateCcw, Users } from "lucide-react-native";
 import { useRef, useState } from "react";
 import { ActivityIndicator, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -19,13 +20,14 @@ export default function HomeSettingsScreen() {
   const { t } = useI18n();
   const { alert } = useAlert();
   const { horizontalPadding } = useResponsiveLayout();
-  const { home, isAdmin, updateHome } = useHome();
+  const { home, isAdmin, updateHome, regenerateInviteCode } = useHome();
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(home?.name || "");
   const [isSavingName, setIsSavingName] = useState(false);
   const [isSavingCurrency, setIsSavingCurrency] = useState<string | null>(null);
   const [showCurrencyModal, setShowCurrencyModal] = useState(false);
+  const [isRotatingCode, setIsRotatingCode] = useState(false);
   const nameInputRef = useRef<TextInput>(null);
 
   const saveName = async () => {
@@ -44,6 +46,23 @@ export default function HomeSettingsScreen() {
       alert(t.common.error, result.error || "Failed to update home name");
       setNameInput(home?.name || "");
     }
+  };
+
+  const handleRotateCode = () => {
+    alert(t.profile.homeCode, t.profile.rotateCodeConfirm, [
+      { text: t.common.cancel, style: "cancel" },
+      {
+        text: t.profile.rotate,
+        onPress: async () => {
+          setIsRotatingCode(true);
+          const result = await regenerateInviteCode();
+          setIsRotatingCode(false);
+          if (!result.success) {
+            alert(t.common.error, result.error || "Failed to regenerate invite code");
+          }
+        },
+      },
+    ]);
   };
 
   const handleSelectCurrency = async (currency: string) => {
@@ -183,6 +202,41 @@ export default function HomeSettingsScreen() {
             )}
           </TouchableOpacity>
         </View>
+
+        {/* Invite Code */}
+        {home.inviteCode && (
+          <View className="mb-8">
+            <Text
+              className="text-xs font-manrope-bold mb-3 ml-1"
+              style={{ color: theme.textSecondary, letterSpacing: 1 }}
+            >
+              {t.profile.homeCode}
+            </Text>
+            <View className="flex-row items-center p-5 rounded-20 gap-3" style={{ backgroundColor: theme.surface }}>
+              <TouchableOpacity
+                className="flex-1 flex-row items-center gap-2"
+                onPress={async () => {
+                  await Clipboard.setStringAsync(home.inviteCode);
+                  alert(t.common.copied, t.profile.inviteCodeCopied);
+                }}
+                activeOpacity={0.7}
+              >
+                <Text className="text-base font-manrope-bold tracking-widest" style={{ color: theme.text }}>
+                  {home.inviteCode}
+                </Text>
+                <Copy size={16} color={theme.textSecondary} />
+              </TouchableOpacity>
+              {isAdmin &&
+                (isRotatingCode ? (
+                  <ActivityIndicator size="small" color={theme.accent.purple} />
+                ) : (
+                  <TouchableOpacity onPress={handleRotateCode}>
+                    <RotateCcw size={20} color={theme.textSecondary} />
+                  </TouchableOpacity>
+                ))}
+            </View>
+          </View>
+        )}
 
         {/* Links */}
         <View className="mb-8 gap-3">

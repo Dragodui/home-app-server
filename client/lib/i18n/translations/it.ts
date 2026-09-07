@@ -398,6 +398,8 @@ export default {
     usernameInvalid: "3-32 caratteri, inizia con lettera, solo a-z, 0-9, _",
     homeCode: "Codice casa",
     inviteCodeCopied: "Codice invito copiato negli appunti",
+    rotate: "Rigenera",
+    rotateCodeConfirm: "Generare un nuovo codice invito? Quello vecchio smetterà di funzionare.",
     homeSettings: "Impostazioni casa",
     settings: "Impostazioni",
     notifications: "Notifiche",

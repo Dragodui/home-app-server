@@ -94,6 +94,23 @@ func (s *HomeService) RegenerateInviteCode(ctx context.Context, homeID int) erro
 		return err
 	}
 
+	// invalidate every member's cached user-homes list, else it keeps serving
+	// the old invite code after regeneration.
+	if members, err := s.repo.GetMembers(ctx, homeID); err == nil {
+		for _, member := range members {
+			userHomesKey := utils.GetUserHomesKey(member.UserID)
+			if deleteErr := utils.DeleteFromCache(ctx, userHomesKey, s.cache); deleteErr != nil {
+				logger.Info.Printf("Failed to delete redis cache for key %s: %v", userHomesKey, deleteErr)
+			}
+			userHomeKey := utils.GetUserHomeKey(member.UserID)
+			if deleteErr := utils.DeleteFromCache(ctx, userHomeKey, s.cache); deleteErr != nil {
+				logger.Info.Printf("Failed to delete redis cache for key %s: %v", userHomeKey, deleteErr)
+			}
+		}
+	} else {
+		logger.Info.Printf("Failed to load members for cache invalidation on home %d: %v", homeID, err)
+	}
+
 	event.SendHomeEvent(ctx, s.cache, homeID, &event.RealTimeEvent{
 		Module: event.ModuleHome,
 		Action: event.ActionUpdated,

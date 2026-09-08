@@ -1,13 +1,24 @@
 import { useRouter } from "expo-router";
-import { Bell, ChartColumn, DoorOpen, Home as HomeIcon, Notebook, Settings, Tv, User, Users, Wifi } from "lucide-react-native";
+import {
+  Bell,
+  ChartColumn,
+  DoorOpen,
+  Home as HomeIcon,
+  Notebook,
+  Settings,
+  Tv,
+  User,
+  Users,
+  Wifi,
+} from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Animated, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useAuth } from "@/stores/authStore";
-import { useI18n } from "@/stores/i18nStore";
-import { useTheme } from "@/stores/themeStore";
+import { Animated, Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Colors from "@/constants/colors";
 import { notificationApi } from "@/lib/api";
+import { useAuth } from "@/stores/authStore";
 import { useHome } from "@/stores/homeStore";
+import { useI18n } from "@/stores/i18nStore";
+import { useTheme } from "@/stores/themeStore";
 
 const CLOSED_SIZE = 48;
 const OPEN_WIDTH = 224;
@@ -179,11 +190,13 @@ export default function ProfileDropdown() {
         pointerEvents="none"
         onLayout={(e) => {
           const h = e.nativeEvent.layout.height;
-          if (h > 0 && Math.abs(h - menuHeight) > 0.5) setMenuHeight(h+20);
+          if (h > 0 && Math.abs(h - menuHeight) > 0.5) setMenuHeight(h + 20);
         }}
       >
         <MenuContent items={menuItems} theme={theme} onPress={() => {}} />
       </View>
+
+      {isOpen && <Pressable style={styles.overlay} onPress={() => toggleMenu(false)} />}
 
       {isOpen && (
         <Animated.View
@@ -269,7 +282,15 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.14,
     shadowRadius: 24,
-    elevation: 12
+    elevation: 12,
+  },
+  overlay: {
+    position: "absolute",
+    top: -2000,
+    left: -2000,
+    width: 4000,
+    height: 4000,
+    zIndex: 0,
   },
   measureHidden: {
     position: "absolute",

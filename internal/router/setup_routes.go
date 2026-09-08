@@ -67,6 +67,11 @@ func SetupRoutes(deps RoutesDeps) http.Handler {
 	rateLimiter := ratelimiter.NewIpRateLimiter()
 
 	r := chi.NewRouter()
+	// Stamps every request with an id (request_id) used to correlate log lines for one request.
+	// Must run before Recoverer so a panic log still carries the request id.
+	r.Use(middleware.RequestID)
+	// Recovers from panics in any downstream handler/middleware and logs them structured.
+	r.Use(middleware.Recoverer)
 	// Request body size limit - prevents DoS via huge payloads
 	r.Use(middleware.BodySizeLimit)
 	// CORS middleware

@@ -8,11 +8,18 @@ services:
       - .env
     depends_on:
       - redis
+      - fluent-bit
     ports:
       - "8000:8000"
     networks:
       - app-network
     restart: always
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
+        fluentd-async: "true"
+        tag: home-app.api
 
   redis:
     image: redis:7
@@ -69,6 +76,65 @@ services:
     depends_on:
       - prometheus
 
+  opensearch:
+    image: opensearchproject/opensearch:2.17.1
+    container_name: opensearch
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - discovery.type=single-node
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      # OpenSearch's security plugin has one fixed built-in user, "admin" -
+      # only its password can be set, so it borrows ADMIN_PASSWORD (same
+      # password already used for Grafana/Prometheus) instead of needing a
+      # new secret.
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${ADMIN_PASSWORD}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+    ports:
+      - "127.0.0.1:9200:9200"
+    networks:
+      - app-network
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.17.1
+    container_name: opensearch-dashboards
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - OPENSEARCH_HOSTS=["https://opensearch:9200"]
+      - OPENSEARCH_USERNAME=admin
+      - OPENSEARCH_PASSWORD=${ADMIN_PASSWORD}
+      - OPENSEARCH_SSL_VERIFICATIONMODE=none
+    ports:
+      - "127.0.0.1:5601:5601"
+    networks:
+      - app-network
+    depends_on:
+      - opensearch
+
+  fluent-bit:
+    image: fluent/fluent-bit:3.1
+    container_name: fluent-bit
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - ./monitoring/fluent-bit/fluent-bit.prod.conf:/fluent-bit/etc/fluent-bit.conf:ro
+      - ./monitoring/fluent-bit/parsers.conf:/fluent-bit/etc/parsers.conf:ro
+    ports:
+      - "127.0.0.1:24224:24224"
+    networks:
+      - app-network
+    depends_on:
+      - opensearch
+
 networks:
   app-network:
     driver: bridge
@@ -76,3 +142,4 @@ networks:
 volumes:
   prometheus-data:
   grafana-data:
+  opensearch-data:

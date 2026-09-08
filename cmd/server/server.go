@@ -30,7 +30,7 @@ type Server struct {
 }
 
 func NewServer() (*Server, error) {
-	logger.Init("app.log")
+	logger.Init()
 	cfg := config.Load()
 
 	db, err := gorm.Open(postgres.Open(cfg.DB_DSN), &gorm.Config{})

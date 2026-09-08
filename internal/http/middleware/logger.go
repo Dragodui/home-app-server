@@ -32,12 +32,15 @@ func RequestResponseLogger(next http.Handler) http.Handler {
 		}
 
 		duration := time.Since(start).Milliseconds()
-		logger.Info.Printf(
-			"%s %s -> %d (%dms)",
-			r.Method,
-			r.URL.RequestURI(),
-			rec.status,
-			duration,
-		)
+		logger.Info.WithFields(map[string]any{
+			"request_id":  GetRequestID(r),
+			"method":      r.Method,
+			"path":        r.URL.Path,
+			"query":       r.URL.RawQuery,
+			"status":      rec.status,
+			"duration_ms": duration,
+			"remote_addr": r.RemoteAddr,
+			"user_agent":  r.UserAgent(),
+		}, "%s %s -> %d (%dms)", r.Method, r.URL.RequestURI(), rec.status, duration)
 	})
 }

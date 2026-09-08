@@ -69,7 +69,7 @@ func (r *taskScheduleRepo) FindDueSchedules(ctx context.Context, now time.Time) 
 }
 
 func (r *taskScheduleRepo) Update(ctx context.Context, schedule *models.TaskSchedule) error {
-	return r.db.WithContext(ctx).Save(schedule).Error
+	return r.db.WithContext(ctx).Omit("Task").Save(schedule).Error
 }
 
 func (r *taskScheduleRepo) Delete(ctx context.Context, id int) error {

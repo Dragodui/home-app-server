@@ -342,11 +342,24 @@ export default function TasksScreen() {
     return activeTasks;
   };
 
+  // For a recurring task, assignments pile up across rotation cycles - the
+  // most recent one (by assignedDate, falling back to id) is the one that
+  // reflects the current cycle, not whichever happens to be first in the array.
+  const getLatestAssignment = (assignmentsList: TaskAssignment[], userId?: number) => {
+    const pool = userId != null ? assignmentsList.filter((a) => a.userId === userId) : assignmentsList;
+    if (pool.length === 0) return undefined;
+    return pool.reduce((latest, current) => {
+      const latestTime = new Date(latest.assignedDate).getTime() || latest.id;
+      const currentTime = new Date(current.assignedDate).getTime() || current.id;
+      return currentTime >= latestTime ? current : latest;
+    });
+  };
+
   const isTaskCompleted = (task: Task) => {
     if (task.assignments && task.assignments.length > 0) {
-      const userAssignment = task.assignments.find((a) => a.userId === user?.id);
+      const userAssignment = getLatestAssignment(task.assignments, user?.id);
       if (userAssignment) return userAssignment.status === "completed";
-      return task.assignments.some((a) => a.status === "completed");
+      return getLatestAssignment(task.assignments)?.status === "completed";
     }
     const assignment = assignments.find((a) => a.taskId === task.id);
     return assignment?.status === "completed";
@@ -354,6 +367,11 @@ export default function TasksScreen() {
 
   const getTaskAssignee = (task: Task) => {
     if (task.assignments && task.assignments.length > 0) {
+      if (task.schedule) {
+        // Recurring task: only the current cycle's assignee is relevant.
+        const current = getLatestAssignment(task.assignments);
+        return current?.user?.name || t.tasks.assigned;
+      }
       const firstName = task.assignments[0].user?.name || t.tasks.assigned;
       if (task.assignments.length > 1) {
         return `${firstName} +${task.assignments.length - 1}`;
@@ -378,12 +396,12 @@ export default function TasksScreen() {
   };
 
   const getTaskCompletedDate = (task: Task) => {
-    let assignment = task.assignments?.find((a) => a.userId === user?.id);
+    let assignment = task.assignments ? getLatestAssignment(task.assignments, user?.id) : undefined;
     if (!assignment) {
       assignment = assignments.find((a) => a.taskId === task.id && a.userId === user?.id);
     }
     if (!assignment && task.assignments) {
-      assignment = task.assignments.find((a) => a.status === "completed");
+      assignment = getLatestAssignment(task.assignments.filter((a) => a.status === "completed"));
     }
 
     if (assignment?.completeDate) {

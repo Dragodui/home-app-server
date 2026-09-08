@@ -155,6 +155,10 @@ export default function TaskDetailScreen() {
     ? t.tasks.schedule[task.schedule.recurrenceType as keyof typeof t.tasks.schedule] || t.tasks.schedule.scheduled
     : null;
 
+  const nextRunText = task.schedule?.nextRunDate
+    ? t.tasks.schedule.nextRun.replace("{date}", new Date(task.schedule.nextRunDate).toLocaleString())
+    : null;
+
   return (
     <View className="flex-1" style={{ backgroundColor: theme.background }}>
       <ScrollView
@@ -274,6 +278,22 @@ export default function TaskDetailScreen() {
                 style={{ color: theme.accent.purple }}
               >
                 {scheduleLabel}
+              </Text>
+            </View>
+          )}
+          {nextRunText && (
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center gap-2">
+                <Clock3 size={16} color={theme.accent.purple} />
+                <Text className="text-sm font-manrope-semibold" style={{ color: theme.textSecondary }}>
+                  {t.tasks.schedule.title}
+                </Text>
+              </View>
+              <Text
+                className="text-sm font-manrope-semibold text-right flex-1 ml-3"
+                style={{ color: theme.accent.purple }}
+              >
+                {nextRunText}
               </Text>
             </View>
           )}

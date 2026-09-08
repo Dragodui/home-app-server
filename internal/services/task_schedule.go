@@ -173,7 +173,18 @@ func (s *TaskScheduleService) ProcessDueSchedules(ctx context.Context) error {
 
 		// Update rotation index and next run date
 		schedule.CurrentRotationIndex = (schedule.CurrentRotationIndex + 1) % len(userIDs)
-		schedule.NextRunDate = calcNextRunDate(now, schedule.RecurrenceType)
+		schedule.NextRunDate = calcNextRunDate(schedule.NextRunDate, schedule.RecurrenceType)
+
+		// Roll the task's own due date forward to the new cycle so it shows up as
+		// freshly due again in the task list, instead of keeping a stale due date
+		// from whenever the schedule was first created.
+		if schedule.Task != nil {
+			nextDue := schedule.NextRunDate
+			schedule.Task.DueDate = &nextDue
+			if err := s.taskRepo.Update(ctx, schedule.Task); err != nil {
+				logger.Info.Printf("[Scheduler] Failed to roll due date for task %d: %v", schedule.TaskID, err)
+			}
+		}
 
 		if err := s.repo.Update(ctx, schedule); err != nil {
 			logger.Info.Printf("[Scheduler] Failed to update schedule %d: %v", schedule.ID, err)

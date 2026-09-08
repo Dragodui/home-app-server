@@ -21,7 +21,7 @@ export default function HomeScreen() {
   const { isAuthenticated, isLoading: authLoading, user } = useAuth();
   const { home, rooms, isLoading: homeLoading } = useHome();
   const { theme } = useTheme();
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const homeCurrency = getHomeCurrency(home);
   const { isDesktop, horizontalPadding, contentMaxWidth } = useResponsiveLayout();
 
@@ -152,7 +152,7 @@ export default function HomeScreen() {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const timeStr = date.toLocaleTimeString([], {
+    const timeStr = date.toLocaleTimeString(language, {
       hour: "numeric",
       minute: "2-digit",
     });
@@ -163,7 +163,7 @@ export default function HomeScreen() {
     if (date.toDateString() === tomorrow.toDateString()) {
       return `${t.common.tomorrow}, ${timeStr}`;
     }
-    return date.toLocaleDateString([], {
+    return date.toLocaleDateString(language, {
       weekday: "short",
       month: "short",
       day: "numeric",
